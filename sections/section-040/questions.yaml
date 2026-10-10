@@ -1,0 +1,132 @@
+schema_version: 1
+kind: question_bank
+id: ats038-section-040
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-040
+  title: Storage
+placement:
+  position: after
+  reading: sections/section-040/module-02/course-03-summary.md
+questions:
+- id: ats038-section-040-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Compare container-local, ephemeral and persistent storage lifecycles.
+  source_readings:
+  - sections/section-040/module-01/course-01-storage-lifecycles-and-claims.md
+  prompt: A container restarts in the same Pod using emptyDir. What can happen to its files?
+  options:
+  - id: a
+    text: They can remain because the volume's lifecycle is the Pod's lifetime.
+    explanation: Container restart does not itself delete the Pod volume.
+  - id: b
+    text: They must be copied into the image registry.
+    explanation: Volume data does not become an image layer automatically.
+  - id: c
+    text: They are guaranteed to survive deletion of the Pod.
+    explanation: Pod deletion removes emptyDir storage.
+  correct_option: a
+  explanation: Container restart does not itself delete the Pod volume.
+- id: ats038-section-040-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Describe StorageClass-based dynamic provisioning.
+  source_readings:
+  - sections/section-040/module-01/course-02-provisioning-classes-and-drivers.md
+  prompt: A PVC uses WaitForFirstConsumer and has no consuming Pod yet. What can its Pending state mean?
+  options:
+  - id: a
+    text: Every Pending claim proves the driver has failed.
+    explanation: Deliberate delayed binding is another explanation.
+  - id: b
+    text: The claim must be renamed to match a node.
+    explanation: Name equality is not the binding mechanism.
+  - id: c
+    text: Binding or provisioning is deliberately waiting for consumer placement.
+    explanation: This mode coordinates storage topology with the workload.
+  correct_option: c
+  explanation: This mode coordinates storage topology with the workload.
+- id: ats038-section-040-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish ReadWriteOnce from ReadWriteOncePod.
+  source_readings:
+  - sections/section-040/module-02/course-01-access-modes-and-data-presentation.md
+  prompt: Two Pods on the same node mount a supported ReadWriteOnce volume. Does this necessarily violate
+    the mode?
+  options:
+  - id: a
+    text: No, because access modes guarantee all concurrent writes are safe.
+    explanation: Attachment support does not provide application data coordination.
+  - id: b
+    text: No; ReadWriteOnce is scoped to one node rather than universally one Pod.
+    explanation: Multiple Pods on that node may use it under the supported arrangement.
+  - id: c
+    text: Yes; ReadWriteOnce always means exactly one Pod.
+    explanation: ReadWriteOncePod is the distinct single-Pod mode.
+  correct_option: b
+  explanation: Multiple Pods on that node may use it under the supported arrangement.
+- id: ats038-section-040-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Compare filesystem and block volume modes.
+  source_readings:
+  - sections/section-040/module-02/course-01-access-modes-and-data-presentation.md
+  prompt: An application expects files in a mounted directory. Which volume mode directly fits that interface?
+  options:
+  - id: a
+    text: Filesystem.
+    explanation: It exposes storage as a filesystem rather than a raw block device.
+  - id: b
+    text: Block without any application adaptation.
+    explanation: A raw block device is not automatically the expected directory interface.
+  - id: c
+    text: The image pull policy.
+    explanation: It controls artifact retrieval rather than volume presentation.
+  correct_option: a
+  explanation: It exposes storage as a filesystem rather than a raw block device.
+- id: ats038-section-040-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Predict Retain and Delete reclaim policy behavior.
+  source_readings:
+  - sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
+  prompt: A released volume has a supported Delete reclaim policy. What important effect can follow claim
+    deletion?
+  options:
+  - id: a
+    text: Only the application process restarts, with no storage lifecycle effect.
+    explanation: Claim release and reclaim policy can affect the backend.
+  - id: b
+    text: The data is automatically archived forever.
+    explanation: Delete does not promise indefinite retention or backup.
+  - id: c
+    text: The backing storage can be removed through reclamation.
+    explanation: The policy governs cleanup after claim release.
+  correct_option: c
+  explanation: The policy governs cleanup after claim release.
+- id: ats038-section-040-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain why persistence, replication and backup are different properties.
+  source_readings:
+  - sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
+  prompt: A replicated storage system copies an accidental bad write. What separate protection can support
+    recovery to an earlier state?
+  options:
+  - id: a
+    text: Changing the Service selector.
+    explanation: Traffic selection does not restore earlier storage content.
+  - id: b
+    text: A suitable verified backup or recovery point.
+    explanation: Replication and historical recovery serve different purposes.
+  - id: c
+    text: More immediate replication alone.
+    explanation: It can copy the unwanted change faster without retaining an earlier state.
+  correct_option: b
+  explanation: Replication and historical recovery serve different purposes.

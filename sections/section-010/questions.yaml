@@ -1,0 +1,172 @@
+schema_version: 1
+kind: question_bank
+id: ats038-section-010
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-010
+  title: Networking
+placement:
+  position: after
+  reading: sections/section-010/module-03/course-03-summary.md
+questions:
+- id: ats038-section-010-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify the network plugin's role and the CNI interface.
+  source_readings:
+  - sections/section-010/module-01/course-01-pod-addresses-and-network-implementation.md
+  prompt: A cluster accepts NetworkPolicy objects but blocked flows still pass. Which implementation property
+    must be checked?
+  options:
+  - id: a
+    text: Whether the network implementation enforces NetworkPolicy.
+    explanation: CNI compatibility alone does not guarantee policy enforcement.
+  - id: b
+    text: Whether the scheduler forwards those packets.
+    explanation: The scheduler assigns nodes rather than implementing traffic forwarding.
+  - id: c
+    text: Whether the Pods have matching display names.
+    explanation: Names do not establish policy implementation support.
+  correct_option: a
+  explanation: CNI compatibility alone does not guarantee policy enforcement.
+- id: ats038-section-010-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish name resolution from application reachability.
+  source_readings:
+  - sections/section-010/module-01/course-02-dns-and-service-discovery.md
+  prompt: A Service name resolves successfully, but requests fail. What has the DNS result established?
+  options:
+  - id: a
+    text: Every backend is healthy.
+    explanation: DNS does not validate each application backend.
+  - id: b
+    text: The client has permission for every application operation.
+    explanation: Name resolution is not application authorization.
+  - id: c
+    text: Name resolution worked, while backend reachability and application behavior still need investigation.
+    explanation: Discovery is one stage of the request path.
+  correct_option: c
+  explanation: Discovery is one stage of the request path.
+- id: ats038-section-010-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain Service selectors, ports and EndpointSlices.
+  source_readings:
+  - sections/section-010/module-02/course-01-selectors-ports-and-backends.md
+  prompt: A Service's selector matches no Pod labels. What is the likely backend result for a selector-based
+    Service?
+  options:
+  - id: a
+    text: The Service creates a Deployment to repair the label mismatch.
+    explanation: A Service does not manage application replicas.
+  - id: b
+    text: No matching Pod endpoints are discovered.
+    explanation: Selection uses labels to identify backends.
+  - id: c
+    text: The Service automatically selects Pods with a matching object name.
+    explanation: Names do not substitute for its selector.
+  correct_option: b
+  explanation: Selection uses labels to identify backends.
+- id: ats038-section-010-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain Service selectors, ports and EndpointSlices.
+  source_readings:
+  - sections/section-010/module-02/course-01-selectors-ports-and-backends.md
+  prompt: A Service forwards to 8080, but its application listens only on 9000. What should be examined?
+  options:
+  - id: a
+    text: The target port mapping and actual listener.
+    explanation: Correct labels do not fix a wrong destination port.
+  - id: b
+    text: The ConfigMap's name length.
+    explanation: That observation does not explain the specified traffic mismatch.
+  - id: c
+    text: The Deployment's replica count alone.
+    explanation: More replicas with the same wrong port remain unreachable through that mapping.
+  correct_option: a
+  explanation: Correct labels do not fix a wrong destination port.
+- id: ats038-section-010-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Compare ClusterIP, NodePort and LoadBalancer Services.
+  source_readings:
+  - sections/section-010/module-02/course-02-external-entry-and-application-routing.md
+  prompt: A local cluster has no external load balancer implementation. A LoadBalancer Service has no
+    external address. What is the best explanation?
+  options:
+  - id: a
+    text: All LoadBalancer Services work without infrastructure integration.
+    explanation: Object creation alone does not provide external load balancing.
+  - id: b
+    text: The API server must run the web application itself.
+    explanation: Application execution and external load balancing are separate roles.
+  - id: c
+    text: The requested infrastructure capability is unavailable.
+    explanation: The resource requires a supporting implementation to allocate and serve an external endpoint.
+  correct_option: c
+  explanation: The resource requires a supporting implementation to allocate and serve an external endpoint.
+- id: ats038-section-010-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain the role separation in the Gateway API.
+  source_readings:
+  - sections/section-010/module-02/course-02-external-entry-and-application-routing.md
+  prompt: A Gateway resource exists but there is no compatible controller. What is missing?
+  options:
+  - id: a
+    text: A requirement to use etcd as a traffic proxy.
+    explanation: etcd stores state rather than handling application ingress.
+  - id: b
+    text: The implementation that realizes listeners and routing intent.
+    explanation: Gateway API resources need a compatible implementation.
+  - id: c
+    text: A rule that the Pod name must equal Gateway.
+    explanation: Matching names do not implement routes.
+  correct_option: b
+  explanation: Gateway API resources need a compatible implementation.
+- id: ats038-section-010-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Predict whether both traffic directions permit a connection.
+  source_readings:
+  - sections/section-010/module-03/course-01-networkpolicy-and-allowed-connections.md
+  prompt: The destination allows ingress from a client, but the client's egress policy blocks the connection.
+    Is the destination allowance sufficient?
+  options:
+  - id: a
+    text: No; isolated source egress must also permit it.
+    explanation: Both endpoints' relevant policy directions can affect the connection.
+  - id: b
+    text: Yes; ingress overrides every egress policy.
+    explanation: The directions are separate controls.
+  - id: c
+    text: Yes; TLS automatically overrides network policy.
+    explanation: Encryption does not grant network-policy permission.
+  correct_option: a
+  explanation: Both endpoints' relevant policy directions can affect the connection.
+- id: ats038-section-010-q08
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain TLS encryption and certificate verification.
+  source_readings:
+  - sections/section-010/module-03/course-02-service-mesh-and-transport-security.md
+  prompt: A client encrypts traffic but does not correctly verify the server certificate identity. What
+    protection is incomplete?
+  options:
+  - id: a
+    text: The replica controller's ownership reference.
+    explanation: Ownership is unrelated to transport peer verification.
+  - id: b
+    text: Image layer reuse.
+    explanation: Image packaging does not verify the network peer.
+  - id: c
+    text: Authentication of the intended server.
+    explanation: Encrypted bytes alone do not establish that the peer is the intended party.
+  correct_option: c
+  explanation: Encrypted bytes alone do not establish that the peer is the intended party.

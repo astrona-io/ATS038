@@ -1,0 +1,133 @@
+schema_version: 1
+kind: question_bank
+id: ats038-section-020
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-020
+  title: Security
+placement:
+  position: after
+  reading: sections/section-020/module-02/course-03-summary.md
+questions:
+- id: ats038-section-020-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish authentication, authorization and admission.
+  source_readings:
+  - sections/section-020/module-01/course-01-api-request-checks-and-workload-identity.md
+  prompt: A valid authenticated identity receives a forbidden API response for reading Pods. Which stage
+    should be investigated first?
+  options:
+  - id: a
+    text: Authorization.
+    explanation: Successful identity authentication does not imply permission for the requested action.
+  - id: b
+    text: Image building.
+    explanation: The failure concerns API permission rather than artifacts.
+  - id: c
+    text: Container scheduling.
+    explanation: Placement does not determine this caller's read grant.
+  correct_option: a
+  explanation: Successful identity authentication does not imply permission for the requested action.
+- id: ats038-section-020-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Compare Role, ClusterRole and their bindings.
+  source_readings:
+  - sections/section-020/module-01/course-01-api-request-checks-and-workload-identity.md
+  prompt: An authorized developer's privileged Pod is rejected by an enforced Restricted policy. Which
+    stage explains the rejection?
+  options:
+  - id: a
+    text: DNS lookup.
+    explanation: Name resolution does not enforce Pod Security profiles.
+  - id: b
+    text: Replica scoring.
+    explanation: Scheduling occurs after resource acceptance and does not perform this admission decision.
+  - id: c
+    text: Admission.
+    explanation: The request can pass identity and permission checks but fail workload policy.
+  correct_option: c
+  explanation: The request can pass identity and permission checks but fail workload policy.
+- id: ats038-section-020-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Compare Role, ClusterRole and their bindings.
+  source_readings:
+  - sections/section-020/module-01/course-02-rbac-scope-and-least-privilege.md
+  prompt: A RoleBinding in outpost refers to a ClusterRole granting Pod reads. Where does this binding
+    grant the namespaced permission?
+  options:
+  - id: a
+    text: Only on nodes named outpost.
+    explanation: Namespace grants are not node-name selection rules.
+  - id: b
+    text: In outpost.
+    explanation: A RoleBinding scopes the grant to its own namespace even when it references a ClusterRole.
+  - id: c
+    text: In every namespace automatically.
+    explanation: That requires a different cluster-wide binding arrangement.
+  correct_option: b
+  explanation: A RoleBinding scopes the grant to its own namespace even when it references a ClusterRole.
+- id: ats038-section-020-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain security context controls and their limits.
+  source_readings:
+  - sections/section-020/module-02/course-01-security-contexts-and-pod-admission.md
+  prompt: An application uses a read-only root filesystem but needs temporary writable files. What is
+    a suitable design?
+  options:
+  - id: a
+    text: Provide an appropriate writable mount for the required temporary data.
+    explanation: Filesystem hardening must be compatible with the application's needed writes.
+  - id: b
+    text: Remove all security controls without examining file paths.
+    explanation: That discards protection instead of addressing the specific requirement.
+  - id: c
+    text: Assume read-only means all mounted volumes are encrypted.
+    explanation: Write restrictions and encryption are different properties.
+  correct_option: a
+  explanation: Filesystem hardening must be compatible with the application's needed writes.
+- id: ats038-section-020-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish image vulnerability checks from artifact identity checks.
+  source_readings:
+  - sections/section-020/module-02/course-02-credentials-and-image-supply-chains.md
+  prompt: An image signature verifies, but a scan finds a vulnerable dependency. Which conclusion is correct?
+  options:
+  - id: a
+    text: A valid signature proves that no dependency is vulnerable.
+    explanation: A trusted publisher can still produce vulnerable content.
+  - id: b
+    text: The vulnerability finding changes the digest without rebuilding.
+    explanation: Artifact identity does not change merely because new evidence is discovered.
+  - id: c
+    text: Origin verification does not eliminate the vulnerability.
+    explanation: Signatures and vulnerability analysis answer different questions.
+  correct_option: c
+  explanation: Signatures and vulnerability analysis answer different questions.
+- id: ats038-section-020-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify sensitive credential handling and excessive privileges.
+  source_readings:
+  - sections/section-020/module-02/course-02-credentials-and-image-supply-chains.md
+  prompt: A password is stored in base64 form in a Secret. Which protection still needs attention?
+  options:
+  - id: a
+    text: Only changing the workload's labels.
+    explanation: Labels do not protect sensitive bytes from authorized or accidental disclosure.
+  - id: b
+    text: Access control, encryption at rest and careful application handling.
+    explanation: Base64 is encoding rather than encryption.
+  - id: c
+    text: No further protection, because base64 guarantees confidentiality.
+    explanation: Anyone with the value can decode it.
+  correct_option: b
+  explanation: Base64 is encoding rather than encryption.

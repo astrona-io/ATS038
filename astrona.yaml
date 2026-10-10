@@ -1,8 +1,9 @@
-# Preparation scaffold. Technical pages stay draft until authoring and review.
+# Reading-only course. YAML assessments are registered separately in assessments/index.yaml.
 training:
   id: ATS038
   title: 'KCNA: Container Orchestration'
-  description: Preparation scaffold for Container Orchestration. Lessons and environments are planned.
+  description: Concept lessons, diagrams and original scenario assessments covering every published objective
+    in this KCNA domain. No labs or playgrounds.
   certification:
     name: Kubernetes and Cloud Native Associate
     code: KCNA
@@ -17,7 +18,7 @@ training:
 modules:
 - id: module-intro
   title: Introduction
-  description: Planned introduction and authoring status.
+  description: Audience, learning approach, reading requirements and contribution process.
   content:
   - type: reading
     title: Introduction
@@ -33,41 +34,141 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Networking
-  description: Planned coverage of this curriculum objective.
+  description: Concept lessons and scenario reasoning for Networking.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: 'Networking: Introduction'
     path: sections/section-010/README.md
   - type: reading
-    title: Networking
+    title: Pod Networking
     path: sections/section-010/module-01/course.md
+  - type: reading
+    title: Pod Addresses And Network Implementation
+    path: sections/section-010/module-01/course-01-pod-addresses-and-network-implementation.md
+  - type: reading
+    title: DNS And Service Discovery
+    path: sections/section-010/module-01/course-02-dns-and-service-discovery.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-01/course-03-summary.md
+  - type: reading
+    title: Services And External Access
+    path: sections/section-010/module-02/course.md
+  - type: reading
+    title: Selectors, Ports And Backends
+    path: sections/section-010/module-02/course-01-selectors-ports-and-backends.md
+  - type: reading
+    title: External Entry And Application Routing
+    path: sections/section-010/module-02/course-02-external-entry-and-application-routing.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-02/course-03-summary.md
+  - type: reading
+    title: Traffic Control
+    path: sections/section-010/module-03/course.md
+  - type: reading
+    title: NetworkPolicy And Allowed Connections
+    path: sections/section-010/module-03/course-01-networkpolicy-and-allowed-connections.md
+  - type: reading
+    title: Service Mesh And Transport Security
+    path: sections/section-010/module-03/course-02-service-mesh-and-transport-security.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-03/course-03-summary.md
 - id: module-020
   title: Security
-  description: Planned coverage of this curriculum objective.
+  description: Concept lessons and scenario reasoning for Security.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: 'Security: Introduction'
     path: sections/section-020/README.md
   - type: reading
-    title: Security
+    title: Identity And Access
     path: sections/section-020/module-01/course.md
+  - type: reading
+    title: API Request Checks And Workload Identity
+    path: sections/section-020/module-01/course-01-api-request-checks-and-workload-identity.md
+  - type: reading
+    title: RBAC Scope And Least Privilege
+    path: sections/section-020/module-01/course-02-rbac-scope-and-least-privilege.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-01/course-03-summary.md
+  - type: reading
+    title: Workload Security
+    path: sections/section-020/module-02/course.md
+  - type: reading
+    title: Security Contexts And Pod Admission
+    path: sections/section-020/module-02/course-01-security-contexts-and-pod-admission.md
+  - type: reading
+    title: Credentials And Image Supply Chains
+    path: sections/section-020/module-02/course-02-credentials-and-image-supply-chains.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-02/course-03-summary.md
 - id: module-030
   title: Troubleshooting
-  description: Planned coverage of this curriculum objective.
+  description: Concept lessons and scenario reasoning for Troubleshooting.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: 'Troubleshooting: Introduction'
     path: sections/section-030/README.md
   - type: reading
-    title: Troubleshooting
+    title: Diagnosing Orchestration Failures
     path: sections/section-030/module-01/course.md
+  - type: reading
+    title: Placement And Dependency Evidence
+    path: sections/section-030/module-01/course-01-placement-and-dependency-evidence.md
+  - type: reading
+    title: Image Preparation And Container Startup
+    path: sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-01/course-03-summary.md
+  - type: reading
+    title: Diagnosing Cluster Services
+    path: sections/section-030/module-02/course.md
+  - type: reading
+    title: Node Health And Shared Dependencies
+    path: sections/section-030/module-02/course-01-node-health-and-shared-dependencies.md
+  - type: reading
+    title: Tracing A Service Request
+    path: sections/section-030/module-02/course-02-tracing-a-service-request.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-02/course-03-summary.md
 - id: module-040
   title: Storage
-  description: Planned coverage of this curriculum objective.
+  description: Concept lessons and scenario reasoning for Storage.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: 'Storage: Introduction'
     path: sections/section-040/README.md
   - type: reading
-    title: Storage
+    title: Volumes And Application State
     path: sections/section-040/module-01/course.md
+  - type: reading
+    title: Storage Lifecycles And Claims
+    path: sections/section-040/module-01/course-01-storage-lifecycles-and-claims.md
+  - type: reading
+    title: Provisioning, Classes And Drivers
+    path: sections/section-040/module-01/course-02-provisioning-classes-and-drivers.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-01/course-03-summary.md
+  - type: reading
+    title: Storage Decisions
+    path: sections/section-040/module-02/course.md
+  - type: reading
+    title: Access Modes And Data Presentation
+    path: sections/section-040/module-02/course-01-access-modes-and-data-presentation.md
+  - type: reading
+    title: Reclaim Policies And Recovery
+    path: sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-02/course-03-summary.md
