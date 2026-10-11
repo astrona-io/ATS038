@@ -1,0 +1,34 @@
+schema_version: 1
+course_id: ATS038
+status: draft
+banks:
+- id: ats038-section-010
+  path: sections/section-010/questions.yaml
+  question_count: 8
+  placement:
+    position: after
+    reading: sections/section-010/module-03/course-03-summary.md
+- id: ats038-section-020
+  path: sections/section-020/questions.yaml
+  question_count: 6
+  placement:
+    position: after
+    reading: sections/section-020/module-02/course-03-summary.md
+- id: ats038-section-030
+  path: sections/section-030/questions.yaml
+  question_count: 6
+  placement:
+    position: after
+    reading: sections/section-030/module-02/course-03-summary.md
+- id: ats038-section-040
+  path: sections/section-040/questions.yaml
+  question_count: 6
+  placement:
+    position: after
+    reading: sections/section-040/module-02/course-03-summary.md
+- id: ats038-domain-review
+  path: assessments/domain-review.yaml
+  question_count: 6
+  placement:
+    position: after
+    reading: sections/section-040/module-02/course-03-summary.md
