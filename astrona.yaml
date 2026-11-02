@@ -35,7 +35,7 @@ modules:
 - id: module-010
   title: Networking
   description: Concept lessons and scenario reasoning for Networking.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: 'Networking: Introduction'
@@ -79,7 +79,7 @@ modules:
 - id: module-020
   title: Security
   description: Concept lessons and scenario reasoning for Security.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: 'Security: Introduction'
@@ -111,7 +111,7 @@ modules:
 - id: module-030
   title: Troubleshooting
   description: Concept lessons and scenario reasoning for Troubleshooting.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: 'Troubleshooting: Introduction'
@@ -143,7 +143,7 @@ modules:
 - id: module-040
   title: Storage
   description: Concept lessons and scenario reasoning for Storage.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: 'Storage: Introduction'
