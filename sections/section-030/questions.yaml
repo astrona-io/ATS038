@@ -1,0 +1,135 @@
+schema_version: 1
+kind: question_bank
+id: ats038-section-030
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-030
+  title: Troubleshooting
+placement:
+  position: after
+  reading: sections/section-030/module-02/course-03-summary.md
+questions:
+- id: ats038-section-030-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Use status, conditions and events to identify a failed lifecycle stage.
+  source_readings:
+  - sections/section-030/module-01/course-01-placement-and-dependency-evidence.md
+  prompt: A Pod has no node assignment and reports an unmatched required affinity rule. What evidence
+    is most relevant?
+  options:
+  - id: a
+    text: The node labels and mandatory placement requirements.
+    explanation: The failure occurs before container execution at the scheduling stage.
+  - id: b
+    text: The application's previous successful response body.
+    explanation: It does not establish a suitable node for the new Pod.
+  - id: c
+    text: The container's database password alone.
+    explanation: That is not the reported placement constraint.
+  correct_option: a
+  explanation: The failure occurs before container execution at the scheduling stage.
+- id: ats038-section-030-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain image pull errors and startup errors.
+  source_readings:
+  - sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+  prompt: The Pod is assigned, and the runtime cannot authenticate to its private image registry. What
+    correction is relevant?
+  options:
+  - id: a
+    text: Raise the Service's port number.
+    explanation: Traffic exposure does not authenticate registry pulls.
+  - id: b
+    text: Increase replicas without changing credentials.
+    explanation: It repeats the same access failure.
+  - id: c
+    text: Provide valid image pull credentials through the intended mechanism.
+    explanation: The failing dependency is artifact retrieval.
+  correct_option: c
+  explanation: The failing dependency is artifact retrieval.
+- id: ats038-section-030-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose evidence before making a corrective change.
+  source_readings:
+  - sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+  prompt: A regular init container keeps failing while the main image is available. Why can the application
+    remain unstarted?
+  options:
+  - id: a
+    text: The Service must own the init container.
+    explanation: Services select traffic backends rather than owning initialization tasks.
+  - id: b
+    text: Regular initialization must complete before application containers start.
+    explanation: The dependency is startup ordering, not the main image's availability.
+  - id: c
+    text: The main image always bypasses init containers once downloaded.
+    explanation: Image availability does not remove the initialization gate.
+  correct_option: b
+  explanation: The dependency is startup ordering, not the main image's availability.
+- id: ats038-section-030-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose the smallest diagnostic scope supported by evidence.
+  source_readings:
+  - sections/section-030/module-02/course-01-node-health-and-shared-dependencies.md
+  prompt: Several unrelated Pods fail on one node while other nodes remain healthy. Where should the investigation
+    initially focus?
+  options:
+  - id: a
+    text: Shared dependencies on the affected node.
+    explanation: The failure distribution supports checking kubelet, runtime and node resources.
+  - id: b
+    text: Assume every application has the same source-code bug.
+    explanation: That does not follow from the node-specific pattern.
+  - id: c
+    text: Delete all namespaces immediately.
+    explanation: That is a broad destructive action without a supported diagnosis.
+  correct_option: a
+  explanation: The failure distribution supports checking kubelet, runtime and node resources.
+- id: ats038-section-030-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Separate DNS resolution from Service backend connectivity.
+  source_readings:
+  - sections/section-030/module-02/course-02-tracing-a-service-request.md
+  prompt: A Service name resolves, but the selector has no matching endpoints. What does the evidence
+    support?
+  options:
+  - id: a
+    text: A proof that DNS is broken.
+    explanation: The specified name resolved successfully.
+  - id: b
+    text: A proof that every application operation succeeded.
+    explanation: No usable backend has been identified.
+  - id: c
+    text: A backend selection problem after discovery.
+    explanation: DNS success and missing endpoints identify distinct request stages.
+  correct_option: c
+  explanation: DNS success and missing endpoints identify distinct request stages.
+- id: ats038-section-030-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain how storage and resource pressure affect workloads.
+  source_readings:
+  - sections/section-030/module-02/course-01-node-health-and-shared-dependencies.md
+  prompt: A container exceeds its memory limit while the node has no reported memory pressure. Which distinction
+    matters?
+  options:
+  - id: a
+    text: A memory limit automatically allocates a larger node.
+    explanation: Limit enforcement is not node provisioning.
+  - id: b
+    text: Container boundary enforcement differs from node-wide pressure.
+    explanation: A per-container limit can cause termination without the same node-wide condition.
+  - id: c
+    text: The two observations cannot coexist.
+    explanation: They measure different boundaries and can coexist.
+  correct_option: b
+  explanation: A per-container limit can cause termination without the same node-wide condition.

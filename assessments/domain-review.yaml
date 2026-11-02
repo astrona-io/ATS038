@@ -1,0 +1,135 @@
+schema_version: 1
+kind: question_bank
+id: ats038-domain-review
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: domain
+  id: domain-review
+  title: Container Orchestration
+placement:
+  position: after
+  reading: sections/section-040/module-02/course-03-summary.md
+questions:
+- id: ats038-domain-review-q01
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain Service selectors, ports and EndpointSlices.
+  source_readings:
+  - sections/section-010/module-02/course-01-selectors-ports-and-backends.md
+  prompt: A name resolves and Pod labels match, but the Service targets the wrong application port. What
+    must be corrected?
+  options:
+  - id: a
+    text: The backend port mapping or intended listener configuration.
+    explanation: Discovery and selection can succeed while the final listener path fails.
+  - id: b
+    text: DNS records alone.
+    explanation: The specified name resolution already works.
+  - id: c
+    text: RBAC list permissions alone.
+    explanation: API read grants do not correct the application traffic port.
+  correct_option: a
+  explanation: Discovery and selection can succeed while the final listener path fails.
+- id: ats038-domain-review-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Predict whether both traffic directions permit a connection.
+  source_readings:
+  - sections/section-010/module-03/course-01-networkpolicy-and-allowed-connections.md
+  prompt: A source and destination are both isolated by supported NetworkPolicy. What must permit their
+    connection?
+  options:
+  - id: a
+    text: Only the destination's object name.
+    explanation: Names do not replace policy rules.
+  - id: b
+    text: Only a valid TLS certificate.
+    explanation: Transport authentication does not override connection policy.
+  - id: c
+    text: The source egress and destination ingress allowances.
+    explanation: Policy directions are independently relevant at the two endpoints.
+  correct_option: c
+  explanation: Policy directions are independently relevant at the two endpoints.
+- id: ats038-domain-review-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Apply least privilege to an API permission scenario.
+  source_readings:
+  - sections/section-020/module-01/course-02-rbac-scope-and-least-privilege.md
+  prompt: A controller only needs Pod reads in one namespace. Which design best combines identity and
+    access requirements?
+  options:
+  - id: a
+    text: Grant every workload cluster-wide administration.
+    explanation: That exceeds the stated need and increases exposure.
+  - id: b
+    text: Use a suitable ServiceAccount and a scoped read binding for the intended namespace.
+    explanation: Workload identity and least-privilege grants together fit the task.
+  - id: c
+    text: Mount a token and assume authentication grants all required access.
+    explanation: Permission is separate from possession of a valid identity token.
+  correct_option: b
+  explanation: Workload identity and least-privilege grants together fit the task.
+- id: ats038-domain-review-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose evidence before making a corrective change.
+  source_readings:
+  - sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+  prompt: A Pod's init task fails, no main process logs exist, and the main image was downloaded. Which
+    stage remains blocked?
+  options:
+  - id: a
+    text: Initialization before main application startup.
+    explanation: Regular init completion gates the main containers even after image availability.
+  - id: b
+    text: Only the Service's external address allocation.
+    explanation: That does not explain the failed initialization dependency.
+  - id: c
+    text: The main application's completed processing.
+    explanation: The main process has not reached execution in the stated evidence.
+  correct_option: a
+  explanation: Regular init completion gates the main containers even after image availability.
+- id: ats038-domain-review-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify the CSI driver's role in storage operations.
+  source_readings:
+  - sections/section-040/module-01/course-02-provisioning-classes-and-drivers.md
+  prompt: A claim uses delayed binding and storage available only in one zone. Why can node placement
+    affect provisioning?
+  options:
+  - id: a
+    text: StorageClass names always equal node names.
+    explanation: Name matching is not the topology contract.
+  - id: b
+    text: A claim guarantees access from every possible node.
+    explanation: Backend and topology restrictions remain relevant.
+  - id: c
+    text: The storage workflow needs a compatible consumer location.
+    explanation: Binding and scheduling can coordinate topology requirements.
+  correct_option: c
+  explanation: Binding and scheduling can coordinate topology requirements.
+- id: ats038-domain-review-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why persistence, replication and backup are different properties.
+  source_readings:
+  - sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
+  prompt: A persistent claim is deleted under Delete policy, and no backup exists. Which assumption was
+    unsafe?
+  options:
+  - id: a
+    text: That DNS records describe Service names.
+    explanation: That networking fact does not explain the storage loss.
+  - id: b
+    text: That persistence alone guaranteed retained recoverable data after claim deletion.
+    explanation: Reclaim policy and backup are separate from surviving Pod replacement.
+  - id: c
+    text: That replicas can ever be replaced.
+    explanation: Replacement is an ordinary workload lifecycle operation.
+  correct_option: b
+  explanation: Reclaim policy and backup are separate from surviving Pod replacement.
