@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Volumes And Application State (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-lab-040-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - busybox:1.37
+
+# Starting state: `scout` keeps its data in an emptyDir, and `probe` waits for
+# a claim that names a StorageClass that does not exist. The faults are left
+# in place on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the workloads and the faulty storage setup
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: scout-data-bound
+      description: The claim scout-data is Bound with the standard class
+      type: file
+      source: validation/validate-scout-data-bound.sh
+      hint: Create a PersistentVolumeClaim named scout-data in starfleet with ReadWriteOnce, 1Gi and storageClassName standard. If the class waits for the first consumer, a Pod must use the claim before it binds.
+    - name: scout-mounts-claim
+      description: scout mounts scout-data at /data instead of an emptyDir
+      type: file
+      source: validation/validate-scout-mounts-claim.sh
+      hint: Edit the Deployment scout. Replace the emptyDir of the volume data with a persistentVolumeClaim that names scout-data.
+    - name: scout-data-persists
+      description: A file in /data survives the deletion of the scout pod
+      type: file
+      source: validation/validate-scout-data-persists.sh
+      hint: The file only survives if the volume behind /data is a claim. Check the Deployment's volumes.
+    - name: probe-data-bound
+      description: The claim probe-data is Bound with the standard class
+      type: file
+      source: validation/validate-probe-data-bound.sh
+      hint: Read the events of the claim with kubectl describe. The class named in the claim does not exist, and storageClassName cannot be edited. Delete the claim and create it again.
+    - name: probe-running
+      description: probe is available and still mounts probe-data
+      type: file
+      source: validation/validate-probe-running.sh
+      hint: Keep the claim name probe-data. Once the claim binds, the pending probe pod can start.
+
+teardown:
+  keepCluster: false

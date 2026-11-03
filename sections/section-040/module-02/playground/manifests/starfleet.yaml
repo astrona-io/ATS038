@@ -1,0 +1,58 @@
+# Starting state: a dynamically provisioned claim `shuttle-logs` used by the
+# `shuttle` Deployment in `starfleet`, plus the empty namespace `outpost`.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shuttle-logs
+  namespace: starfleet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: busybox:1.37
+          command:
+            - sh
+            - -c
+            - |
+              [ -e /logs/marker.txt ] || echo shuttle-log > /logs/marker.txt
+              sleep 36000
+          volumeMounts:
+            - name: logs
+              mountPath: /logs
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: shuttle-logs

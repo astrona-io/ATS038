@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Services And External Access (LAB). Graded against the live cluster. UNTESTED.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-lab-010-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - curlimages/curl:8.22.0
+
+# Starting state: the Starfleet workloads and a faulty Service scout-public
+# (wrong selector, wrong targetPort). The fault is left in place on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the Starfleet workloads and the faulty Service
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: scout-public-fixed
+      description: scout-public has ready endpoints and a client reaches it
+      type: file
+      source: validation/validate-scout-public-fixed.sh
+      hint: Compare the Service selector with the Pod labels, and use the container port name http as the targetPort.
+    - name: scout-nodeport
+      description: scout-nodeport is a NodePort Service on port 30080
+      type: file
+      source: validation/validate-scout-nodeport.sh
+      hint: Set type NodePort, select app=scout, and set nodePort to 30080 on the port entry.
+    - name: ingress-routes-scout
+      description: Ingress starfleet-web routes scout.starfleet.test to scout-public
+      type: file
+      source: validation/validate-ingress-routes-scout.sh
+      hint: Use host scout.starfleet.test, path /, pathType Prefix, and the backend Service scout-public on port 80.
+    - name: scout-service-unchanged
+      description: The original scout Service still answers (guard)
+      type: file
+      source: validation/validate-scout-service-unchanged.sh
+      hint: Do not edit or delete the scout Service. Fix scout-public instead.
+
+teardown:
+  keepCluster: false

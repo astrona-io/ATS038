@@ -1,0 +1,73 @@
+# Starting state: `shuttle` writes to a dynamically provisioned claim, and the
+# pod `archivist` waits for a claim `archive-claim` that does not exist yet.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shuttle-logs
+  namespace: starfleet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: busybox:1.37
+          command:
+            - sh
+            - -c
+            - |
+              [ -e /logs/marker.txt ] || echo shuttle-log > /logs/marker.txt
+              sleep 36000
+          volumeMounts:
+            - name: logs
+              mountPath: /logs
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: shuttle-logs
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: archivist
+  namespace: starfleet
+  labels:
+    app: archivist
+spec:
+  containers:
+    - name: archivist
+      image: busybox:1.37
+      command: ["sh", "-c", "echo logbook > /archive/owner; sleep 36000"]
+      volumeMounts:
+        - name: archive
+          mountPath: /archive
+  volumes:
+    - name: archive
+      persistentVolumeClaim:
+        claimName: archive-claim

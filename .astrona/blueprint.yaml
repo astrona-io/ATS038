@@ -1,0 +1,172 @@
+# Blueprint for ATS038, derived from AUTHORING.yaml after the 2026-11-03 hands-on rebuild.
+version: 1
+mode: extend
+course:
+  id: ATS038
+  certification:
+    name: Kubernetes and Cloud Native Associate
+    code: KCNA
+    provider: CNCF / Linux Foundation
+    domain: Container Orchestration
+    weight: 28
+    competencies:
+    - Networking
+    - Security
+    - Troubleshooting
+    - Storage
+  title: 'KCNA: Container Orchestration'
+  git_url: ssh://git@github.com/astrona-io/ATS038.git
+  environment:
+    runtime: kind
+    kind_node_image: kindest/node:v1.35.8
+    podinfo: 6.15.0
+    go-httpbin: 2.25.0
+    curl: 8.22.0
+defaults:
+  playground: true
+  module_lab: true
+  capstone: true
+  section_quiz: true
+  final_quiz: true
+sections:
+- id: section-010
+  title: Networking
+  curriculum_item: Networking
+  modules:
+  - id: module-01
+    title: Pod Networking
+    objectives:
+    - Explain Pod addresses and communication in the Kubernetes network model.
+    - Identify the network plugin's role and the CNI interface.
+    - Explain Service discovery through DNS.
+    - Distinguish name resolution from application reachability.
+    outline:
+    - Pod Addresses And Network Implementation
+    - DNS And Service Discovery
+    playground: true
+    module_lab: true
+    diagrams: []
+  - id: module-02
+    title: Services And External Access
+    objectives:
+    - Explain Service selectors, ports and EndpointSlices.
+    - Compare ClusterIP, NodePort and LoadBalancer Services.
+    - Distinguish Ingress from a Service and its implementation.
+    - Explain the role separation in the Gateway API.
+    outline:
+    - Selectors, Ports And Backends
+    - External Entry And Application Routing
+    playground: true
+    module_lab: true
+    diagrams: []
+  - id: module-03
+    title: Traffic Control
+    objectives:
+    - Explain how NetworkPolicy selects and isolates Pods.
+    - Predict whether both traffic directions permit a connection.
+    - Distinguish network policy from service mesh capabilities.
+    - Explain TLS encryption and certificate verification.
+    outline:
+    - NetworkPolicy And Allowed Connections
+    - Service Mesh And Transport Security
+    playground: true
+    module_lab: true
+    diagrams: []
+  capstone: true
+  section_quiz: true
+- id: section-020
+  title: Security
+  curriculum_item: Security
+  modules:
+  - id: module-01
+    title: Identity And Access
+    objectives:
+    - Distinguish authentication, authorization and admission.
+    - Explain ServiceAccounts and token-based workload identities.
+    - Compare Role, ClusterRole and their bindings.
+    - Apply least privilege to an API permission scenario.
+    outline:
+    - API Request Checks And Workload Identity
+    - RBAC Scope And Least Privilege
+    playground: true
+    module_lab: true
+    diagrams: []
+  - id: module-02
+    title: Workload Security
+    objectives:
+    - Explain security context controls and their limits.
+    - Compare the Privileged, Baseline and Restricted Pod Security profiles.
+    - Identify sensitive credential handling and excessive privileges.
+    - Distinguish image vulnerability checks from artifact identity checks.
+    outline:
+    - Security Contexts And Pod Admission
+    - Credentials And Image Supply Chains
+    playground: true
+    module_lab: true
+    diagrams: []
+  capstone: true
+  section_quiz: true
+- id: section-030
+  title: Troubleshooting
+  curriculum_item: Troubleshooting
+  modules:
+  - id: module-01
+    title: Diagnosing Orchestration Failures
+    objectives:
+    - Use status, conditions and events to identify a failed lifecycle stage.
+    - Distinguish placement failures from preparation failures.
+    - Explain image pull errors and startup errors.
+    - Choose evidence before making a corrective change.
+    outline:
+    - Placement And Dependency Evidence
+    - Image Preparation And Container Startup
+    playground: true
+    module_lab: true
+    diagrams: []
+  - id: module-02
+    title: Diagnosing Cluster Services
+    objectives:
+    - Distinguish a node problem from a single workload problem.
+    - Separate DNS resolution from Service backend connectivity.
+    - Explain how storage and resource pressure affect workloads.
+    - Choose the smallest diagnostic scope supported by evidence.
+    outline:
+    - Node Health And Shared Dependencies
+    - Tracing A Service Request
+    playground: true
+    module_lab: true
+    diagrams: []
+  capstone: true
+  section_quiz: true
+- id: section-040
+  title: Storage
+  curriculum_item: Storage
+  modules:
+  - id: module-01
+    title: Volumes And Application State
+    objectives:
+    - Compare container-local, ephemeral and persistent storage lifecycles.
+    - Explain the PersistentVolume and PersistentVolumeClaim relationship.
+    - Describe StorageClass-based dynamic provisioning.
+    - Identify the CSI driver's role in storage operations.
+    outline:
+    - Storage Lifecycles And Claims
+    - Provisioning, Classes And Drivers
+    playground: true
+    module_lab: true
+    diagrams: []
+  - id: module-02
+    title: Storage Decisions
+    objectives:
+    - Distinguish ReadWriteOnce from ReadWriteOncePod.
+    - Compare filesystem and block volume modes.
+    - Predict Retain and Delete reclaim policy behavior.
+    - Explain why persistence, replication and backup are different properties.
+    outline:
+    - Access Modes And Data Presentation
+    - Reclaim Policies And Recovery
+    playground: true
+    module_lab: true
+    diagrams: []
+  capstone: true
+  section_quiz: true

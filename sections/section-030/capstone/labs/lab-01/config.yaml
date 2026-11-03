@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Troubleshooting Capstone (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-capstone-030
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - curlimages/curl:8.22.0
+
+# Starting state: a namespace `orbit` with a healthy client and four
+# applications that fail at different stages. The faults are left in place on
+# purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the orbit namespace, the client and the four faulty applications
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: beacon-reachable
+      description: beacon runs and answers through its Service
+      type: file
+      source: validation/validate-beacon-reachable.sh
+      hint: There are two faults in a row. First the image cannot be pulled. After you fix it, the Service still sends traffic to a port the container does not listen on.
+    - name: signal-scheduled
+      description: signal is scheduled and available
+      type: file
+      source: validation/validate-signal-scheduled.sh
+      hint: The pod is Pending with no node. The scheduler event names the resource that no node can give. Lower the request.
+    - name: relay-stays-running
+      description: relay stays running without restarts
+      type: file
+      source: validation/validate-relay-stays-running.sh
+      hint: The container is killed by the kubelet, not by the application. Read the pod events for the probe that fails and correct its path to /healthz.
+    - name: cargo-starts
+      description: cargo starts with its token from a Secret
+      type: file
+      source: validation/validate-cargo-starts.sh
+      hint: The pod status names a Secret that does not exist. Create the Secret with the key the Deployment asks for. Do not remove the variable.
+    - name: nothing-removed
+      description: All Deployments still run at least one replica and no node was changed
+      type: file
+      source: validation/validate-nothing-removed.sh
+      hint: This check passes before any change and fails if a fix scales a Deployment to zero, deletes it or labels a node.
+
+teardown:
+  keepCluster: false

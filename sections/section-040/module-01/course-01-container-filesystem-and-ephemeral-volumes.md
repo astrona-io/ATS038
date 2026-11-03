@@ -1,45 +1,93 @@
----
-draft: true
-exam_objectives:
-  - Storage
----
-# Storage Lifecycles And Claims
+# Container Filesystem And Ephemeral Volumes
 
-The `probe` application caches temporary files and stores durable reports. These two data classes need different lifecycles. A container's writable layer is tied to container execution and is unsuitable for important retained data. A volume exposes storage to containers through a mount and can have a different lifecycle.
+A container image is a stack of read-only layers. When the container runtime starts a container, it adds one thin writable layer on top and gives the process a filesystem made of all the layers together. Every file the process creates goes into that writable layer. The kubelet, the agent that runs on each node and manages its Pods, can delete a container and start a new one at any time. The new container gets a fresh writable layer, and the old files are gone. This part shows exactly which files survive that replacement and which do not, because the answer decides where an application may keep its data.
 
-An `emptyDir` volume exists for a Pod's lifetime. Containers can share it, and data can survive a container restart within that Pod. Deleting the Pod removes that temporary volume. A replacement Pod does not inherit it simply because the workload uses the same application name.
+## The writable container layer
 
-A PersistentVolume (PV) represents provisioned storage in the cluster. A PersistentVolumeClaim (PVC) is a namespaced request for storage with requirements such as capacity and access mode. A Pod references the claim, which binds to a suitable volume. This separates an application's request from the infrastructure-specific storage details.
+The writable layer belongs to one container instance, not to the Pod and not to the image. A container restart is a new container instance, so it starts with an empty writable layer. A container restarts when its process exits and the Pod's `restartPolicy` allows it, when a liveness probe fails, or when the node runs out of memory and the kernel stops the process. The Pod, with its name, its IP address and its volumes, stays the same during all of these events.
+
+Kubernetes does not copy the writable layer anywhere before it deletes the container. There is also no size guarantee: the layer uses the node's disk, and a process that writes a lot into it can push the node into disk pressure. For these two reasons, treat the container filesystem as scratch space for files that the application can create again.
+
+The `scout` Pod in your playground shows this. Its container loops and exits with an error when it finds `/tmp/crash`. Write a file to the container layer and a file to the `emptyDir` volume at `/scratch`, then create the crash file:
+
+<!-- astrona:playground:renew -->
+
+```sh
+kubectl -n starfleet exec deploy/scout -- sh -c 'echo layer > /tmp/layer-note; echo volume > /scratch/volume-note'
+kubectl -n starfleet exec deploy/scout -- touch /tmp/crash
+```
+
+The container exits within a second. The kubelet starts a new container in the same Pod. Check the restart count and the two files:
+
+```sh
+kubectl -n starfleet get pods -l app=scout
+kubectl -n starfleet exec deploy/scout -- ls /tmp /scratch
+```
+
+The `RESTARTS` column now shows 1. The listing shows `volume-note` in `/scratch` and no `layer-note` and no `crash` in `/tmp`. The file in the container layer is gone, and the file in the volume is still there. This is the whole difference between container-local storage and a volume.
+
+## emptyDir: storage for the life of the Pod
+
+An `emptyDir` volume is a directory that the kubelet creates on the node when it assigns the Pod to that node. It starts empty and every container of the Pod can mount it. It survives container restarts, because the directory belongs to the Pod. It is deleted for good when the Pod is removed from the node, for any reason: `kubectl delete pod`, an eviction, a node drain or a Deployment rollout that replaces the Pod.
+
+By default, the directory is on the node's disk. With `medium: Memory`, the kubelet mounts a `tmpfs` (a filesystem that lives in RAM) instead. Memory-backed files count against the container's memory limit, and they disappear when the node restarts. The `sizeLimit` field sets a maximum size, and the kubelet evicts the Pod when the volume grows beyond it.
+
+Typical uses are scratch space for a sort or a build, a cache that can be rebuilt, and a directory that two containers of one Pod share. Two containers in the same Pod share files by mounting the same `emptyDir`, because they have separate container layers but can mount the same volume.
 
 ```mermaid
 flowchart TB
-    P["Pod"] -->|"uses"| C["PersistentVolumeClaim"]
-    C -->|"binds"| V["PersistentVolume"]
-    V -->|"represents"| S["Storage system"]
+    L["container layer"] -->|"container restart"| X1["deleted"]
+    E["emptyDir volume"] -->|"container restart"| K["kept"]
+    E -->|"Pod deleted"| X2["deleted"]
 ```
-The Pod requests access through a claim, while the volume represents the provisioned storage.
 
-Persistence means data can outlive a Pod according to the storage lifecycle. It does not prove that storage is replicated, backed up or accessible from every node. A local volume and a remote replicated service have different failure properties despite both being persistent.
+The diagram shows that a container restart deletes only the container layer, and that the `emptyDir` is deleted when the Pod is deleted.
 
-For a scenario, first ask what must survive: a process restart, Pod replacement, node loss or a regional outage. An `emptyDir` can satisfy the first case but not all the others. Then examine the provisioned storage system and the application's data consistency requirements.
+Now delete the whole Pod and look at `/scratch` in the replacement:
 
-## Predicting What Survives Each Event
+```sh
+kubectl -n starfleet delete pod -l app=scout
+kubectl -n starfleet rollout status deployment/scout
+kubectl -n starfleet exec deploy/scout -- ls /scratch
+```
 
-A temporary file in the container's writable layer belongs to that container execution environment. A file in an `emptyDir` belongs to the Pod's lifetime. A file on a suitable persistent volume can outlive the Pod through its claim and storage lifecycle. These three files may have identical names inside the process while behaving differently during failure.
+The Deployment's ReplicaSet creates a new Pod. The new Pod gets a new, empty `emptyDir`, so the listing shows no `volume-note`. Data that must survive a Pod deletion needs a volume that is not tied to the Pod.
 
-For a container restart within the same Pod, the `emptyDir` can remain available. For Pod deletion, its data does not transfer to the replacement. For replacement using the same persistent claim, the data can be accessible again if the backend and mount requirements permit it. Node loss adds another question: whether that storage can be reached from the replacement's location.
+## configMap and secret volumes: configuration as files
 
-A volume mount defines where the process sees data. Two containers share data only when they access the same underlying volume through appropriate mounts. One container's ordinary image directory does not become shared merely because the containers occupy one Pod.
+A `configMap` volume turns the keys of a ConfigMap into files, one file per key, and the value becomes the file content. A `secret` volume does the same for a Secret. The kubelet writes the files and keeps them current: when someone updates the ConfigMap, the kubelet updates the files in a running Pod after a short delay, without a restart. The update does not reach a container that mounts the volume with `subPath`, and it does not reach environment variables.
 
-## Claim Binding Is Not Data Protection
+The kubelet writes Secret volumes to a `tmpfs`, so the values do not reach the node's disk. Both volume types are read-only for the application in practice, and a Secret volume is mounted with mode `0644` unless `defaultMode` says otherwise. These volumes are not application storage. They carry small pieces of configuration and credentials from the API into the Pod.
 
-A PVC describes a request, including capacity, access mode and selected storage class where applicable. A bound PV represents the chosen storage resource. Binding establishes an association; it does not independently prove that the application can write consistent records, that the backend is replicated or that a backup exists.
+Read the files that the `scout` Pod received:
 
-The claim is namespaced while the volume resource is cluster-scoped. This separates application ownership from infrastructure representation. A Pod normally uses a claim in its relevant namespace rather than freely selecting arbitrary volumes as though all storage were one global directory.
+```sh
+kubectl -n starfleet exec deploy/scout -- sh -c 'ls /etc/scout /etc/scout-secret; cat /etc/scout/mode'
+```
 
-Choose storage by loss tolerance and access needs. Temporary caches can use ephemeral storage when rebuilding is acceptable. Reports requiring retention need a suitable persistent or external data service and a recovery plan. A persistence choice should explain exactly which events the data survives and which still require backup or manual restoration.
+The first `ls` shows the ConfigMap keys `interval` and `mode`, and the second shows the Secret key `token`. The `cat` prints `patrol`.
+
+## hostPath: a directory of the node
+
+A `hostPath` volume mounts a file or directory of the node's own filesystem into the Pod. The data survives Pod deletion because it lives on the node. It stays on that one node, so a Pod that the scheduler places on another node sees different files. A `hostPath` volume also gives the container access to the node's filesystem, which is a security risk, and the `baseline` and `restricted` Pod Security Standards forbid it.
+
+Use `hostPath` for node-level agents that must read node files, such as a log collector. Do not use it for application data. On a single-node test cluster such as `kind`, the default storage also keeps its data in a directory on the node, so data looks persistent in a playground even when the same design would lose it on a cluster with several nodes.
+
+Compare the four lifetimes in one place:
+
+| Where the file is | Survives a container restart | Survives Pod deletion | Shared between nodes |
+| --- | --- | --- | --- |
+| Container layer | No | No | No |
+| `emptyDir` | Yes | No | No |
+| `hostPath` | Yes | Yes, only on the same node | No |
+| PersistentVolume through a claim | Yes | Yes | Depends on the storage backend |
+
+You now know which files survive which event. The open question is how to get a volume whose life does not depend on any single Pod, and that is the job of the PersistentVolume.
 
 ## Common pitfalls
 
 > [!WARNING]
-> `emptyDir` survives a container restart within its Pod, but not Pod deletion. Persistent storage does not automatically provide backups or cross-node availability.
+> - Do not store data you cannot recreate in the container layer or in an `emptyDir`. A Deployment rollout, an eviction or a node drain deletes the Pod and its `emptyDir` with it.
+> - A `configMap` or `secret` volume mounted with `subPath` never receives updates. Mount the whole directory when the application must see changes.
+> - `medium: Memory` counts against the container memory limit. A large file in a memory-backed volume can get the container killed.
+> - A Pod that restarts keeps its `emptyDir`. A Pod that is replaced does not. Check which of the two happened before you decide that data was lost.

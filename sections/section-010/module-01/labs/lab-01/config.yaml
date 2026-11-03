@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Pod Networking (LAB). Graded against the live cluster. UNTESTED.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-lab-010-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - curlimages/curl:8.22.0
+
+# Starting state: the Starfleet workloads and their ClusterIP Services.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the Starfleet workloads and Services
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: probe-address-recorded
+      description: ConfigMap probe-address holds the probe Pod IP address
+      type: file
+      source: validation/validate-probe-address-recorded.sh
+      hint: Read the address with kubectl get pod -o wide or a jsonpath on .status.podIP, then create the ConfigMap with --from-literal=podIP=<address>.
+    - name: probe-pods-headless
+      description: A headless Service probe-pods resolves to the probe Pod
+      type: file
+      source: validation/validate-probe-pods-headless.sh
+      hint: Set clusterIP to None, select app=probe, and use the container port 8080 as the Service port.
+    - name: outpost-scout-alias
+      description: drifter reaches scout by its short name in outpost
+      type: file
+      source: validation/validate-outpost-scout-alias.sh
+      hint: Create a Service named scout in outpost of type ExternalName that points at the fully qualified name of the scout Service in starfleet.
+    - name: probe-service-unchanged
+      description: The original probe Service still answers (guard)
+      type: file
+      source: validation/validate-probe-service-unchanged.sh
+      hint: Do not edit or delete the probe Service in starfleet.
+
+teardown:
+  keepCluster: false

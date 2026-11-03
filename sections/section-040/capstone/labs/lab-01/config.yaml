@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Storage Capstone (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-capstone-040
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - busybox:1.37
+
+# Starting state: the namespace `orbit` with the StatefulSet `ledger` on an
+# emptyDir and the Deployment `reporter` waiting for a claim with a missing
+# StorageClass. The faults are left in place on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the orbit namespace and the faulty storage setup
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: ledger-claims-bound
+      description: Each ledger replica has its own Bound claim from a volumeClaimTemplate
+      type: file
+      source: validation/validate-ledger-claims-bound.sh
+      hint: Add a volumeClaimTemplates entry named data (1Gi, ReadWriteOnce, standard) to the StatefulSet. It cannot be edited on an existing StatefulSet, so delete and re-create it.
+    - name: ledger-ready
+      description: ledger has 2 ready replicas and the data volume at /var/ledger is not an emptyDir
+      type: file
+      source: validation/validate-ledger-ready.sh
+      hint: Remove the emptyDir volume named data from the pod template. The volumeClaimTemplate supplies the volume with that name.
+    - name: ledger-data-persists
+      description: A file in /var/ledger survives deletion of ledger-0
+      type: file
+      source: validation/validate-ledger-data-persists.sh
+      hint: The file survives only if /var/ledger is a claim that the replacement pod mounts again.
+    - name: ledger-volumes-retained
+      description: The volumes behind data-ledger-0 and data-ledger-1 have the Retain policy
+      type: file
+      source: validation/validate-ledger-volumes-retained.sh
+      hint: Read the volumeName of each claim, then patch persistentVolumeReclaimPolicy on that PersistentVolume.
+    - name: reporter-running
+      description: reporter is available and report-cache is Bound with class standard
+      type: file
+      source: validation/validate-reporter-running.sh
+      hint: The class in the claim does not exist and cannot be edited. Delete the claim and create it again with the class standard.
+
+teardown:
+  keepCluster: false

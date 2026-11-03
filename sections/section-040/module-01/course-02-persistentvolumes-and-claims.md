@@ -1,39 +1,137 @@
----
-draft: true
-exam_objectives:
-  - Storage
----
-# Provisioning, Classes And Drivers
+# PersistentVolumes And Claims
 
-A team requests storage without asking an operator to create every volume manually. A StorageClass describes a storage offering and identifies a provisioner, with implementation-specific parameters. Dynamic provisioning uses a claim and class to create suitable storage when supported by the infrastructure.
+An application that must keep its data needs storage that exists on its own, outside any one Pod. Kubernetes separates two jobs to make this work. One side describes real storage that exists in the cluster. The other side describes what an application asks for. The control plane then matches the two. This part creates both sides by hand and shows how the match happens, because the same objects appear in every storage failure you will diagnose.
 
-Static provisioning starts with a volume already prepared by an operator. Dynamic provisioning creates the backing resource in response to a claim. A claim can remain unbound when no suitable volume or working provisioning path is available. Merely creating a StorageClass does not install a provisioner or grant it access to an external storage account.
+## The two objects
 
-The Container Storage Interface (CSI) defines an integration interface for storage systems and container orchestration. CSI drivers support operations such as provisioning, attaching and mounting according to their capabilities. The Kubernetes control plane, driver components and underlying storage system each contribute to the final mounted volume.
+A PersistentVolume (PV) is a cluster-level object that describes one piece of real storage: how big it is, which access modes it allows, where the data lives and what happens to it when it is no longer needed. A PV has no namespace. An administrator creates it by hand, or a provisioner creates it automatically.
 
-Volume binding can happen immediately or wait until a consuming Pod is considered for placement. `WaitForFirstConsumer` helps align storage provisioning with topology requirements such as a zone. A waiting claim under that mode may be normal before a consumer is scheduled, rather than evidence that the system is broken.
+A PersistentVolumeClaim (PVC) is a namespaced object that asks for storage: a minimum size, the access modes the Pod needs and, optionally, a StorageClass. A Pod never names a PV. A Pod names a PVC in its `volumes` list, and the PVC stands between the Pod and the storage. This separation lets a developer ask for "1 GiB that one node can write" without knowing where the storage is.
 
-Capacity, access requirements and topology all matter. Storage available only in one zone can restrict where its consumer runs. A node with sufficient CPU can still be unsuitable for the volume. The scheduler and storage binding workflow must reach a compatible decision.
+```mermaid
+flowchart TB
+    P["Pod"] -->|"volumes: persistentVolumeClaim"| C["PVC: archive-claim"]
+    C -->|"bound to"| V["PV: archive-pv"]
+    V -->|"points at"| S["real storage"]
+```
 
-If a claim remains Pending, examine its class, requested properties, binding mode and provisioning evidence. Then distinguish a deliberate wait from a driver or infrastructure failure. Storage troubleshooting needs the claim-to-backend relationship rather than assuming every storage object works independently.
+The diagram shows that the Pod reaches the real storage only through the claim and the volume that the claim is bound to.
 
-## Provisioning Through A StorageClass
+## Create a volume by hand
 
-A PVC requests ten gibibytes using a particular StorageClass. The class identifies a provisioner and parameters for its storage offering. A working provisioner can create the external storage resource and the corresponding PV, then enable the binding workflow. The external system must have capacity and the integration must have appropriate credentials and connectivity.
+The playground cluster has one node, so a `hostPath` volume is enough to see the objects work. Save this as `pv-archive.yaml`:
 
-Static provisioning instead starts with a prepared PV whose properties can satisfy the claim. Either route can fail if capacity, class, mode or other requirements do not match. A similarly named PV is not enough; binding uses the resource's actual contract and state.
+<!-- astrona:playground:renew -->
 
-A CSI driver can implement provisioning, attachment and node mount operations through supported components. Its controller-side and node-side roles can fail independently. Successful provisioning is not proof that the node-side mount completed, and a mounted volume does not prove a distant backend remains healthy.
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: archive-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /mnt/starfleet-archive
+    type: DirectoryOrCreate
+```
 
-## Topology-Aware Binding
+Apply it:
 
-Immediate binding can select storage before the consuming Pod's location is known. With topology-constrained storage, that choice can make later placement difficult. `WaitForFirstConsumer` allows binding or provisioning to consider the consumer's scheduling needs so storage and node placement can agree.
+```sh
+kubectl apply -f pv-archive.yaml
+```
 
-Suppose the application requires zone A and the requested storage is available only in zone B. More generic CPU capacity does not resolve the mismatch. The desired placement or storage offering must become compatible. If no consumer has been created under delayed binding, a waiting claim can be expected rather than a failure.
+Then check the result:
 
-A useful diagnosis traces class selection, provisioner availability, backing-resource creation, claim binding, attachment and mounting. Identify the last successful stage and the required location. Storage resource names and a Pending summary alone do not provide enough detail to choose a correct remedy.
+```sh
+kubectl get pv archive-pv
+```
+
+The `STATUS` column shows `Available`. An available PV is free: no claim uses it. The `capacity` field is the size that the PV offers, `accessModes` lists how nodes may mount it, and `storageClassName: manual` is only a label here. No provisioner and no StorageClass object named `manual` is needed, because nothing creates this volume. The label only lets a claim ask for exactly this kind of volume.
+
+## Claim the volume and watch the binding
+
+Save this as `pvc-archive-claim.yaml`:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: archive-claim
+  namespace: starfleet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 500Mi
+```
+
+Apply it and look at both objects:
+
+```sh
+kubectl apply -f pvc-archive-claim.yaml
+kubectl -n starfleet get pvc archive-claim
+kubectl get pv archive-pv
+```
+
+Both now show `Bound`. The claim asked for 500Mi, and the PV shows 1Gi. A claim binds to a PV that is at least as big as the request, so the claim receives the whole 1Gi volume. The size that the claim shows in its `CAPACITY` column is the PV's size, not the requested size.
+
+The PV controller, a loop that runs inside `kube-controller-manager`, does the binding. For each unbound claim it looks for an available PV that matches on four things: the `storageClassName` string must be equal, the PV must offer every access mode that the claim lists, the PV capacity must be at least the request, and the `volumeMode` (filesystem or block) must be equal. A claim can add a `selector` with labels to narrow the choice, or a `volumeName` to name one PV. When the controller finds a match, it writes the claim's name into the PV's `claimRef` field and writes the PV's name into the claim's `volumeName`. A PV and a PVC bind one to one: a bound PV serves exactly one claim, even if the PV is larger than the claim needs.
+
+If no PV matches, the claim stays `Pending`. The controller checks again whenever a PV or a claim changes, so creating a matching PV later binds the waiting claim. `kubectl describe pvc` shows the reason in its events.
+
+## Use the claim in a Pod and keep the data
+
+A Pod mounts the claim by name. Save this as `pod-archivist.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: archivist
+  namespace: starfleet
+spec:
+  containers:
+    - name: archivist
+      image: busybox:1.37
+      command: ["sh", "-c", "echo logbook > /archive/entry; sleep 3600"]
+      volumeMounts:
+        - name: archive
+          mountPath: /archive
+  volumes:
+    - name: archive
+      persistentVolumeClaim:
+        claimName: archive-claim
+```
+
+Apply it, delete the Pod, apply it again and read the file:
+
+```sh
+kubectl apply -f pod-archivist.yaml
+kubectl -n starfleet delete pod archivist
+kubectl apply -f pod-archivist.yaml
+kubectl -n starfleet exec archivist -- cat /archive/entry
+```
+
+The file `entry` exists in the second Pod. The first Pod is gone, but the claim and the volume are not, so the data stayed. A Pod that is deleted while a claim exists does not delete the claim.
+
+The claim also protects itself. While a Pod uses a claim, the claim carries the finalizer `kubernetes.io/pvc-protection` (a marker that makes the API server delay deletion). A `kubectl delete pvc` on a claim that a Pod still uses leaves the claim in `Terminating` until the Pod is gone. The PV has the matching finalizer `kubernetes.io/pv-protection`, which stops the deletion of a PV that is still bound to a claim.
+
+## What the phases tell you
+
+A PV moves through the phases `Available`, `Bound`, `Released` and `Failed`. A claim has the phases `Pending`, `Bound` and `Lost`. `Released` means that the claim was deleted but the volume was not yet cleaned up for reuse. `Lost` means that the claim's PV no longer exists. A claim that stays `Pending` usually has one of three causes: no PV matches, the StorageClass does not exist, or the binding mode waits for a Pod. You now know how a hand-made volume binds. The next question is who creates the volume when nobody wants to create it by hand.
 
 ## Common pitfalls
 
 > [!WARNING]
-> A StorageClass is a description, not a storage driver installation. Delayed binding can be intentional and must be interpreted together with the consuming Pod's placement.
+> - A PVC and a PV bind one to one. A 500Mi claim that binds a 1Gi PV occupies the whole PV, and no other claim can use the remainder.
+> - `storageClassName` must be the same string on both sides. An empty string (`""`) is different from a missing field: it asks for a PV that has no class.
+> - A claim is namespaced and a PV is not. A Pod can only use a claim from its own namespace.
+> - Deleting the Pod does not delete the claim, and deleting the claim does not always delete the data. What happens to the volume depends on its reclaim policy.

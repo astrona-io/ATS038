@@ -1,0 +1,50 @@
+# Reference solution: the headless Service, the NodePort Service and the
+# NetworkPolicy. The beacon Service is fixed by apply.sh with a patch.
+apiVersion: v1
+kind: Service
+metadata:
+  name: beacon-pods
+  namespace: orbit
+spec:
+  clusterIP: None
+  selector:
+    app: beacon
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beacon-external
+  namespace: orbit
+spec:
+  type: NodePort
+  selector:
+    app: beacon
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: beacon-from-relay
+  namespace: orbit
+spec:
+  podSelector:
+    matchLabels:
+      app: beacon
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: relay
+      ports:
+        - protocol: TCP
+          port: 9898

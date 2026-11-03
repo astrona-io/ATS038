@@ -1,0 +1,41 @@
+# Starting state for workload security: a Secret `api-key` in starfleet, and a
+# Deployment `debug-tool` in outpost whose container is privileged (wrong, on
+# purpose). No Pod Security label is set on either namespace.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-key
+  namespace: starfleet
+type: Opaque
+stringData:
+  token: starfleet-demo-token
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debug-tool
+  namespace: outpost
+  labels:
+    app: debug-tool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debug-tool
+  template:
+    metadata:
+      labels:
+        app: debug-tool
+    spec:
+      containers:
+        - name: debug-tool
+          image: busybox:1.37
+          command: ["sleep", "3600"]
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi

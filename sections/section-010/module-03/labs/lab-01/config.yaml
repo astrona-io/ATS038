@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Traffic Control (LAB). Graded against the live cluster. UNTESTED.
+# The checks need a network plugin that enforces NetworkPolicy (kindnet in
+# current kind releases is expected to).
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-lab-010-03
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - curlimages/curl:8.22.0
+
+# Starting state: the Starfleet workloads plus relay, and no NetworkPolicy.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the workloads without any NetworkPolicy
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: probe-allows-shuttle
+      description: shuttle reaches probe on port 8080
+      type: file
+      source: validation/validate-probe-allows-shuttle.sh
+      hint: The ingress rule must allow Pods with app=shuttle on TCP 8080, the container port.
+    - name: probe-blocks-drifter
+      description: drifter cannot reach probe
+      type: file
+      source: validation/validate-probe-blocks-drifter.sh
+      hint: Select the probe Pods with a NetworkPolicy of type Ingress that lists only the shuttle Pods.
+    - name: drifter-egress-restricted
+      description: drifter cannot reach relay
+      type: file
+      source: validation/validate-drifter-egress-restricted.sh
+      hint: Create a NetworkPolicy of type Egress in outpost that selects drifter and lists only the allowed destinations.
+    - name: drifter-resolves-and-reaches-scout
+      description: drifter still resolves and reaches scout (guard)
+      type: file
+      source: validation/validate-drifter-resolves-and-reaches-scout.sh
+      hint: Allow UDP and TCP 53 to the kube-dns Pods in kube-system, and TCP 9898 to the scout Pods in starfleet.
+
+teardown:
+  keepCluster: false

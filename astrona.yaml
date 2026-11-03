@@ -1,9 +1,9 @@
-# Reading-only course. YAML assessments are registered separately in assessments/index.yaml.
+# Hands-on course: readings, playgrounds (shown by each landing page's marker), graded labs, capstones and quizzes. All labs are UNTESTED (static checks only).
 training:
   id: ATS038
   title: 'KCNA: Container Orchestration'
-  description: Concept lessons, diagrams and original scenario assessments covering every published objective
-    in this KCNA domain. No labs or playgrounds.
+  description: Concept lessons, diagrams, kind-based playgrounds, graded labs, section capstones and original
+    scenario quizzes covering every published objective in this KCNA domain.
   certification:
     name: Kubernetes and Cloud Native Associate
     code: KCNA
@@ -16,159 +16,498 @@ training:
     - Troubleshooting
     - Storage
 modules:
-- id: module-intro
-  title: Introduction
-  description: Audience, learning approach, reading requirements and contribution process.
-  content:
-  - type: reading
+  - id: module-intro
     title: Introduction
-    path: sections/intro/README.md
-  - type: reading
-    title: Welcome To The Course
-    path: sections/intro/course-01-welcome.md
-  - type: reading
-    title: Get Your Machine Ready
-    path: sections/intro/course-02-get-your-machine-ready.md
-  - type: reading
-    title: How This Course Is Made
-    path: sections/intro/course-03-how-this-course-is-made.md
-- id: module-010
-  title: Networking
-  description: Concept lessons and scenario reasoning for Networking.
-  status: alpha
-  content:
-  - type: reading
-    title: 'Networking: Introduction'
-    path: sections/section-010/README.md
-  - type: reading
-    title: Pod Networking
-    path: sections/section-010/module-01/course.md
-  - type: reading
-    title: Pod Addresses And Network Implementation
-    path: sections/section-010/module-01/course-01-pod-addresses-and-network-implementation.md
-  - type: reading
-    title: DNS And Service Discovery
-    path: sections/section-010/module-01/course-02-dns-and-service-discovery.md
-  - type: reading
-    title: Summary
-    path: sections/section-010/module-01/course-03-summary.md
-  - type: reading
-    title: Services And External Access
-    path: sections/section-010/module-02/course.md
-  - type: reading
-    title: Selectors, Ports And Backends
-    path: sections/section-010/module-02/course-01-selectors-ports-and-backends.md
-  - type: reading
-    title: External Entry And Application Routing
-    path: sections/section-010/module-02/course-02-external-entry-and-application-routing.md
-  - type: reading
-    title: Summary
-    path: sections/section-010/module-02/course-03-summary.md
-  - type: reading
-    title: Traffic Control
-    path: sections/section-010/module-03/course.md
-  - type: reading
-    title: NetworkPolicy And Allowed Connections
-    path: sections/section-010/module-03/course-01-networkpolicy-and-allowed-connections.md
-  - type: reading
-    title: Service Mesh And Transport Security
-    path: sections/section-010/module-03/course-02-service-mesh-and-transport-security.md
-  - type: reading
-    title: Summary
-    path: sections/section-010/module-03/course-03-summary.md
-- id: module-020
-  title: Security
-  description: Concept lessons and scenario reasoning for Security.
-  status: alpha
-  content:
-  - type: reading
-    title: 'Security: Introduction'
-    path: sections/section-020/README.md
-  - type: reading
-    title: Identity And Access
-    path: sections/section-020/module-01/course.md
-  - type: reading
-    title: API Request Checks And Workload Identity
-    path: sections/section-020/module-01/course-01-api-request-checks-and-workload-identity.md
-  - type: reading
-    title: RBAC Scope And Least Privilege
-    path: sections/section-020/module-01/course-02-rbac-scope-and-least-privilege.md
-  - type: reading
-    title: Summary
-    path: sections/section-020/module-01/course-03-summary.md
-  - type: reading
-    title: Workload Security
-    path: sections/section-020/module-02/course.md
-  - type: reading
-    title: Security Contexts And Pod Admission
-    path: sections/section-020/module-02/course-01-security-contexts-and-pod-admission.md
-  - type: reading
-    title: Credentials And Image Supply Chains
-    path: sections/section-020/module-02/course-02-credentials-and-image-supply-chains.md
-  - type: reading
-    title: Summary
-    path: sections/section-020/module-02/course-03-summary.md
-- id: module-030
-  title: Troubleshooting
-  description: Concept lessons and scenario reasoning for Troubleshooting.
-  status: alpha
-  content:
-  - type: reading
-    title: 'Troubleshooting: Introduction'
-    path: sections/section-030/README.md
-  - type: reading
-    title: Diagnosing Orchestration Failures
-    path: sections/section-030/module-01/course.md
-  - type: reading
-    title: Placement And Dependency Evidence
-    path: sections/section-030/module-01/course-01-placement-and-dependency-evidence.md
-  - type: reading
-    title: Image Preparation And Container Startup
-    path: sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
-  - type: reading
-    title: Summary
-    path: sections/section-030/module-01/course-03-summary.md
-  - type: reading
-    title: Diagnosing Cluster Services
-    path: sections/section-030/module-02/course.md
-  - type: reading
-    title: Node Health And Shared Dependencies
-    path: sections/section-030/module-02/course-01-node-health-and-shared-dependencies.md
-  - type: reading
-    title: Tracing A Service Request
-    path: sections/section-030/module-02/course-02-tracing-a-service-request.md
-  - type: reading
-    title: Summary
-    path: sections/section-030/module-02/course-03-summary.md
-- id: module-040
-  title: Storage
-  description: Concept lessons and scenario reasoning for Storage.
-  status: alpha
-  content:
-  - type: reading
-    title: 'Storage: Introduction'
-    path: sections/section-040/README.md
-  - type: reading
-    title: Volumes And Application State
-    path: sections/section-040/module-01/course.md
-  - type: reading
-    title: Storage Lifecycles And Claims
-    path: sections/section-040/module-01/course-01-storage-lifecycles-and-claims.md
-  - type: reading
-    title: Provisioning, Classes And Drivers
-    path: sections/section-040/module-01/course-02-provisioning-classes-and-drivers.md
-  - type: reading
-    title: Summary
-    path: sections/section-040/module-01/course-03-summary.md
-  - type: reading
-    title: Storage Decisions
-    path: sections/section-040/module-02/course.md
-  - type: reading
-    title: Access Modes And Data Presentation
-    path: sections/section-040/module-02/course-01-access-modes-and-data-presentation.md
-  - type: reading
-    title: Reclaim Policies And Recovery
-    path: sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
-  - type: reading
-    title: Summary
-    path: sections/section-040/module-02/course-03-summary.md
+    description: Audience, learning approach, reading requirements and contribution process.
+    content:
+    - type: reading
+      title: Introduction
+      path: sections/intro/README.md
+    - type: reading
+      title: Welcome To The Course
+      path: sections/intro/course-01-welcome.md
+    - type: reading
+      title: Get Your Machine Ready
+      path: sections/intro/course-02-get-your-machine-ready.md
+    - type: reading
+      title: How This Course Is Made
+      path: sections/intro/course-03-how-this-course-is-made.md
+  - id: module-010
+    title: "Networking"
+    description: >
+      Makes the reader able to explain how Pods, Services and external clients
+      reach each other in a Kubernetes cluster, and how traffic is limited:
+      Pod addresses and the network plugin, cluster DNS, Services and their
+      endpoints, Ingress and the Gateway API, NetworkPolicy, service meshes and
+      TLS certificates.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-010/README.md
+      - type: reading
+        title: Pod Networking
+        path: sections/section-010/module-01/course.md
+      - type: reading
+        title: Pod Addresses And The Network Model
+        path: sections/section-010/module-01/course-01-pod-addresses-and-network-implementation.md
+      - type: reading
+        title: The Network Plugin And Cross-Node Traffic
+        path: sections/section-010/module-01/course-02-the-network-plugin-and-cross-node-traffic.md
+      - type: reading
+        title: DNS And Service Discovery In Practice
+        path: sections/section-010/module-01/course-03-dns-and-service-discovery-in-practice.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Pod Networking Lab"
+        path: sections/section-010/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: networking
+        task_kind: build
+        tags: [pod-ip, coredns, headless-service, externalname]
+        learning_goals:
+          - Read a Pod IP address and record it
+          - Create a headless Service that resolves to Pod addresses
+          - Create an ExternalName Service that makes a short name resolve across namespaces
+        resources:
+          - name: "Kubernetes cluster networking"
+            url: https://kubernetes.io/docs/concepts/cluster-administration/networking/
+          - name: "DNS for Services and Pods"
+            url: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+      - type: reading
+        title: Summary
+        path: sections/section-010/module-01/course-04-summary.md
+      - type: reading
+        title: Services And External Access
+        path: sections/section-010/module-02/course.md
+      - type: reading
+        title: Selectors, Ports And Backends
+        path: sections/section-010/module-02/course-01-selectors-ports-and-backends.md
+      - type: reading
+        title: Service Types And Node Access
+        path: sections/section-010/module-02/course-02-service-types-and-node-access.md
+      - type: reading
+        title: External Entry And Application Routing
+        path: sections/section-010/module-02/course-03-external-entry-and-application-routing.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Services And External Access Lab"
+        path: sections/section-010/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: networking
+        task_kind: build
+        tags: [service, selector, endpointslice, nodeport, ingress]
+        learning_goals:
+          - Fix a Service whose selector and targetPort are wrong
+          - Expose an application through a NodePort Service
+          - Write an Ingress that routes a host name to a Service
+        resources:
+          - name: "Service"
+            url: https://kubernetes.io/docs/concepts/services-networking/service/
+          - name: "EndpointSlices"
+            url: https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/
+          - name: "Ingress"
+            url: https://kubernetes.io/docs/concepts/services-networking/ingress/
+      - type: reading
+        title: Summary
+        path: sections/section-010/module-02/course-04-summary.md
+      - type: reading
+        title: Traffic Control
+        path: sections/section-010/module-03/course.md
+      - type: reading
+        title: NetworkPolicy And Allowed Connections
+        path: sections/section-010/module-03/course-01-networkpolicy-and-allowed-connections.md
+      - type: reading
+        title: Egress Rules And Both Directions
+        path: sections/section-010/module-03/course-02-egress-rules-and-both-directions.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-03/labs/lab-01/question.md
+      - type: lab
+        title: "Traffic Control Lab"
+        path: sections/section-010/module-03/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: network-policy
+        task_kind: build
+        tags: [networkpolicy, ingress, egress, dns]
+        learning_goals:
+          - Allow only one client Pod to reach a backend with an ingress NetworkPolicy
+          - Restrict the egress of a client Pod and keep DNS working
+        resources:
+          - name: "Network policies"
+            url: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+      - type: reading
+        title: Service Mesh And Transport Security
+        path: sections/section-010/module-03/course-03-service-mesh-and-transport-security.md
+      - type: reading
+        title: Summary
+        path: sections/section-010/module-03/course-04-summary.md
+      - type: reading
+        title: Question
+        path: sections/section-010/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Networking Capstone"
+        path: sections/section-010/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 30m
+        topic: networking
+        task_kind: build
+        tags: [service, headless-service, nodeport, networkpolicy, endpointslice]
+        learning_goals:
+          - Fix a Service that has no endpoints
+          - Create a headless Service and a NodePort Service
+          - Limit access to an application with a NetworkPolicy
+        resources:
+          - name: "Service"
+            url: https://kubernetes.io/docs/concepts/services-networking/service/
+          - name: "Network policies"
+            url: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+      - type: quiz
+        title: "Knowledge Check: Networking"
+        path: sections/section-010/quiz.yaml
+        pass_score: 70
+# Paste into astrona.yaml as one module entry. Paths are relative to the repository root.
+# Each lab sits right after the part it tests.
+  - id: module-020
+    title: "Security"
+    description: >
+      Makes the reader able to explain who may do what in the Kubernetes API
+      and what a pod may do on its node: authentication, authorization and
+      admission, ServiceAccounts, RBAC, security contexts, Pod Security
+      admission, Secrets and image checks.
+    content:
+      - type: reading
+        title: "Identity And Access"
+        path: sections/section-020/module-01/course.md
+      - type: reading
+        title: "API Request Checks And Workload Identity"
+        path: sections/section-020/module-01/course-01-api-request-checks-and-workload-identity.md
+      - type: reading
+        title: "RBAC Scope And Least Privilege"
+        path: sections/section-020/module-01/course-02-rbac-scope-and-least-privilege.md
+      - type: reading
+        title: "Diagnosing And Tightening Access"
+        path: sections/section-020/module-01/course-03-diagnosing-and-tightening-access.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Identity And Access Lab"
+        path: sections/section-020/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: access-control
+        task_kind: troubleshoot
+        tags: [rbac, role, rolebinding, clusterrolebinding, serviceaccount, least-privilege, auth-can-i]
+        learning_goals:
+          - Fix a Role that names the wrong API group
+          - Replace a cluster-wide binding with a RoleBinding in one namespace
+          - Stop a pod from mounting a ServiceAccount token it does not use
+        resources:
+          - name: "Kubernetes RBAC reference"
+            url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+          - name: "Kubernetes service accounts"
+            url: https://kubernetes.io/docs/concepts/security/service-accounts/
+      - type: reading
+        title: Summary
+        path: sections/section-020/module-01/course-04-summary.md
+
+      - type: reading
+        title: "Workload Security"
+        path: sections/section-020/module-02/course.md
+      - type: reading
+        title: "Security Contexts And Pod Admission"
+        path: sections/section-020/module-02/course-01-security-contexts-and-pod-admission.md
+      - type: reading
+        title: "Credentials And Image Supply Chains"
+        path: sections/section-020/module-02/course-02-credentials-and-image-supply-chains.md
+      - type: reading
+        title: "Enforcing Pod Security Levels"
+        path: sections/section-020/module-02/course-03-enforcing-pod-security-levels.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Workload Security Lab"
+        path: sections/section-020/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: workload-security
+        task_kind: migration
+        tags: [security-context, secrets, pod-security-admission, baseline, read-only-root-filesystem]
+        learning_goals:
+          - Harden a Deployment with a non-root user, no privilege escalation, a read-only root filesystem and dropped capabilities
+          - Deliver a Secret as a read-only volume instead of an environment variable
+          - Remove a privileged container and enforce the Baseline level on a namespace
+        resources:
+          - name: "Pod Security admission"
+            url: https://kubernetes.io/docs/concepts/security/pod-security-admission/
+          - name: "Configure a security context"
+            url: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+          - name: "Kubernetes Secrets"
+            url: https://kubernetes.io/docs/concepts/configuration/secret/
+      - type: reading
+        title: Summary
+        path: sections/section-020/module-02/course-04-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-020/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Security Capstone"
+        path: sections/section-020/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 30m
+        topic: security
+        task_kind: build
+        tags: [rbac, least-privilege, security-context, secrets, pod-security-admission, baseline]
+        learning_goals:
+          - Replace a cluster-wide binding with a namespaced Role and RoleBinding
+          - Harden a privileged Deployment and deliver its Secret as a volume
+          - Enforce the Baseline level on a namespace while the workload keeps serving
+        resources:
+          - name: "Kubernetes RBAC reference"
+            url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+          - name: "Pod Security admission"
+            url: https://kubernetes.io/docs/concepts/security/pod-security-admission/
+      - type: quiz
+        title: "Knowledge Check: Security"
+        path: sections/section-020/quiz.yaml
+        pass_score: 70
+  - id: module-030
+    title: "Troubleshooting"
+    description: >
+      Makes the reader able to find why a Kubernetes workload does not work
+      and fix it with one targeted change: pods that stay Pending, image pull
+      and crash failures, out-of-memory kills, failing probes, node
+      conditions, missing dependencies, Services with no endpoints or the
+      wrong port, and DNS resolution. Every module has a playground with
+      seeded faults and a graded lab, and the section closes with a capstone.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-030/README.md
+
+      - type: reading
+        title: "Diagnosing Orchestration Failures"
+        path: sections/section-030/module-01/course.md
+      - type: reading
+        title: "Placement And Dependency Evidence"
+        path: sections/section-030/module-01/course-01-placement-and-dependency-evidence.md
+      - type: reading
+        title: "Image Preparation And Container Startup"
+        path: sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+      - type: reading
+        title: "Probes And Safe Corrective Changes"
+        path: sections/section-030/module-01/course-03-probes-and-safe-corrective-changes.md
+      - type: reading
+        title: Question
+        path: sections/section-030/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Diagnosing Orchestration Failures Lab"
+        path: sections/section-030/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: troubleshooting
+        task_kind: troubleshooting
+        tags: [pending, nodeselector, resource-requests, imagepullbackoff, crashloopbackoff, oomkilled, readiness-probe, kubectl-describe]
+        learning_goals:
+          - Read FailedScheduling events and fix a node selector and a CPU request that no node can satisfy
+          - Fix an image tag, a crashing command and a memory limit from the container state and exit code
+          - Correct a readiness probe path so a running pod becomes Ready
+        resources:
+          - name: "Debug Pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+          - name: "Configure liveness, readiness and startup probes"
+            url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+      - type: reading
+        title: Summary
+        path: sections/section-030/module-01/course-04-summary.md
+
+      - type: reading
+        title: "Diagnosing Cluster Services"
+        path: sections/section-030/module-02/course.md
+      - type: reading
+        title: "Node Health And Shared Dependencies"
+        path: sections/section-030/module-02/course-01-node-health-and-shared-dependencies.md
+      - type: reading
+        title: "Tracing A Service Request"
+        path: sections/section-030/module-02/course-02-tracing-a-service-request.md
+      - type: reading
+        title: "DNS Resolution And Debug Containers"
+        path: sections/section-030/module-02/course-03-dns-resolution-and-debug-containers.md
+      - type: reading
+        title: Question
+        path: sections/section-030/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Diagnosing Cluster Services Lab"
+        path: sections/section-030/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: troubleshooting
+        task_kind: troubleshooting
+        tags: [service, selector, endpointslice, targetport, configmap, dns, curl-exit-code]
+        learning_goals:
+          - Fix a Service selector that matches no pod by comparing it with the pod labels and the EndpointSlice
+          - Fix a Service target port that the container does not listen on
+          - Create the missing ConfigMap that keeps a pod from creating its container
+        resources:
+          - name: "Debug Services"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/
+          - name: "Debugging DNS resolution"
+            url: https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/
+      - type: reading
+        title: Summary
+        path: sections/section-030/module-02/course-04-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-030/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Troubleshooting Capstone"
+        path: sections/section-030/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 30m
+        topic: troubleshooting
+        task_kind: troubleshooting
+        tags: [imagepullbackoff, service, targetport, pending, liveness-probe, secret, createcontainerconfigerror]
+        learning_goals:
+          - Find and fix two faults in a row, an image tag and a Service target port, for one application
+          - Fix an unschedulable resource request and a failing liveness probe
+          - Create the missing Secret that blocks a container from being created
+        resources:
+          - name: "Debug Pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+          - name: "Debug Services"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/
+      - type: quiz
+        title: "Knowledge Check: Troubleshooting"
+        path: sections/section-030/quiz.yaml
+        pass_score: 70
+  - id: module-040
+    title: "Storage"
+    description: >
+      Makes the reader able to decide where application data lives and
+      what happens to it: the lifetimes of container, ephemeral and
+      persistent storage, PersistentVolumes, claims, StorageClasses and
+      CSI drivers, access modes and volume modes, reclaim policies,
+      StatefulSet claim templates, and the difference between
+      persistence, replication and backup.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-040/README.md
+
+      - type: reading
+        title: "Volumes And Application State"
+        path: sections/section-040/module-01/course.md
+      - type: reading
+        title: "Container Filesystem And Ephemeral Volumes"
+        path: sections/section-040/module-01/course-01-container-filesystem-and-ephemeral-volumes.md
+      - type: reading
+        title: "PersistentVolumes And Claims"
+        path: sections/section-040/module-01/course-02-persistentvolumes-and-claims.md
+      - type: reading
+        title: "StorageClasses, Provisioning And CSI"
+        path: sections/section-040/module-01/course-03-storageclasses-provisioning-and-csi.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Volumes And Application State Lab"
+        path: sections/section-040/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: storage
+        task_kind: troubleshooting
+        tags: [persistentvolumeclaim, storageclass, volumes, dynamic-provisioning, deployment]
+        learning_goals:
+          - Create a claim and mount it in a Deployment so its data survives a Pod replacement
+          - Explain why a claim naming a missing StorageClass stays Pending
+          - Re-create a claim with an existing StorageClass because the class of a claim cannot be changed
+        resources:
+          - name: "Kubernetes persistent volumes"
+            url: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+          - name: "Kubernetes storage classes"
+            url: https://kubernetes.io/docs/concepts/storage/storage-classes/
+          - name: "Kubernetes volumes"
+            url: https://kubernetes.io/docs/concepts/storage/volumes/
+      - type: reading
+        title: Summary
+        path: sections/section-040/module-01/course-04-summary.md
+
+      - type: reading
+        title: "Storage Decisions"
+        path: sections/section-040/module-02/course.md
+      - type: reading
+        title: "Access Modes And Data Presentation"
+        path: sections/section-040/module-02/course-01-access-modes-and-data-presentation.md
+      - type: reading
+        title: "Reclaim Policies And Recovery"
+        path: sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Storage Decisions Lab"
+        path: sections/section-040/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: storage
+        task_kind: build
+        tags: [persistentvolume, reclaim-policy, retain, hostpath, static-provisioning]
+        learning_goals:
+          - Create a static PersistentVolume with the Retain policy and bind a claim to it
+          - Patch the volume behind a dynamically provisioned claim from Delete to Retain
+          - Explain what a Retain volume does after its claim is deleted
+        resources:
+          - name: "Kubernetes persistent volumes"
+            url: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+          - name: "Change the reclaim policy of a PersistentVolume"
+            url: https://kubernetes.io/docs/tasks/administer-cluster/change-pv-reclaim-policy/
+      - type: reading
+        title: "Expansion, Snapshots And Data Protection"
+        path: sections/section-040/module-02/course-03-expansion-snapshots-and-data-protection.md
+      - type: reading
+        title: Summary
+        path: sections/section-040/module-02/course-04-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-040/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Storage Capstone"
+        path: sections/section-040/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 30m
+        topic: storage
+        task_kind: troubleshooting
+        tags: [statefulset, volumeclaimtemplates, persistentvolumeclaim, storageclass, reclaim-policy, retain]
+        learning_goals:
+          - Give a StatefulSet per-replica storage with volumeClaimTemplates and show the data survives a Pod replacement
+          - Set the Retain policy on the volumes behind the StatefulSet claims
+          - Re-create a Pending claim with an existing StorageClass
+        resources:
+          - name: "Kubernetes StatefulSets"
+            url: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
+          - name: "Kubernetes persistent volumes"
+            url: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+          - name: "Kubernetes storage classes"
+            url: https://kubernetes.io/docs/concepts/storage/storage-classes/
+      - type: quiz
+        title: "Knowledge Check: Storage"
+        path: sections/section-040/quiz.yaml
+        pass_score: 70
+      - type: quiz
+        title: 'Final Knowledge Check: Container Orchestration'
+        path: sections/final-domain-quiz.yaml
+        pass_score: 70

@@ -1,0 +1,288 @@
+# Knowledge check for the Security section. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats038-020
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-020
+  title: "Security"
+questions:
+  - id: ats038-020-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Distinguish authentication, authorization and admission, and say which failure returns which status code"
+    source_readings:
+      - sections/section-020/module-01/course-01-api-request-checks-and-workload-identity.md
+    prompt: "A request to the API server returns `403 Forbidden`. Which check refused it, and what is the right kind of fix?"
+    options:
+      - id: a
+        text: "Authentication refused it, so the credential must be replaced."
+        explanation: "A failed authentication returns `401 Unauthorized`, not `403`."
+      - id: b
+        text: "Authorization refused it, so a rule must allow the user, verb, resource and namespace."
+        explanation: "Correct. The API server knew the caller, and no rule allowed the request."
+      - id: c
+        text: "Admission refused it, so the object content must change."
+        explanation: "An admission rejection names the controller or policy and the field that broke the rule, and it does not use a plain RBAC message."
+      - id: d
+        text: "etcd refused it, so the cluster database must be restored."
+        explanation: "etcd stores objects after all checks pass and does not decide access."
+    correct_option: b
+    explanation: "Correct. The API server knew the caller, and no rule allowed the request."
+
+  - id: ats038-020-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain what a ServiceAccount is and how a pod receives its token"
+    source_readings:
+      - sections/section-020/module-01/course-01-api-request-checks-and-workload-identity.md
+    prompt: "What does the kubelet place in a container for its ServiceAccount by default?"
+    options:
+      - id: a
+        text: "A long-lived token stored in a Secret that never expires."
+        explanation: "Current versions do not create long-lived token Secrets automatically."
+      - id: b
+        text: "The user's kubeconfig file with cluster administrator rights."
+        explanation: "Pods never receive an administrator kubeconfig file."
+      - id: c
+        text: "A signed token bound to the pod that expires and is refreshed, in a file under `/var/run/secrets/kubernetes.io/serviceaccount`."
+        explanation: "Correct. The token is bound to the pod and has an expiry time."
+      - id: d
+        text: "A client certificate that the node generates for each container."
+        explanation: "Pods call the API with the ServiceAccount token, not with a node-generated certificate."
+    correct_option: c
+    explanation: "Correct. The token is bound to the pod and has an expiry time."
+
+  - id: ats038-020-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Stop a pod from receiving a ServiceAccount token it does not use"
+    source_readings:
+      - sections/section-020/module-01/course-03-diagnosing-and-tightening-access.md
+    prompt: "The `shuttle` Deployment never calls the Kubernetes API. What is the correct way to stop its pods from receiving a token?"
+    options:
+      - id: a
+        text: "Delete the ServiceAccount `shuttle`."
+        explanation: "Deleting the account can stop pods from starting, and it does not remove the token setting."
+      - id: b
+        text: "Set `automountServiceAccountToken: false` in the pod template or on the ServiceAccount."
+        explanation: "Correct. New pods then have no token file."
+      - id: c
+        text: "Remove every Role in the namespace."
+        explanation: "Roles define permissions and do not control whether the token file is mounted."
+      - id: d
+        text: "Set `readOnlyRootFilesystem: true` on the container."
+        explanation: "This setting protects the image files and does not control the token mount."
+    correct_option: b
+    explanation: "Correct. New pods then have no token file."
+
+  - id: ats038-020-q04
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Choose between Role and ClusterRole, and between RoleBinding and ClusterRoleBinding"
+    source_readings:
+      - sections/section-020/module-01/course-02-rbac-scope-and-least-privilege.md
+    prompt: "The built-in `view` ClusterRole must give the service account `drifter` read access in the namespace `outpost` only. Which setup is correct?"
+    options:
+      - id: a
+        text: "A `ClusterRoleBinding` from `drifter` to `view`."
+        explanation: "This grants the rules in every namespace."
+      - id: b
+        text: "A `RoleBinding` in `outpost` from `drifter` to the `view` ClusterRole."
+        explanation: "Correct. A `RoleBinding` limits a ClusterRole's rules to its own namespace."
+      - id: c
+        text: "A `Role` named `view` in `starfleet`."
+        explanation: "A Role in another namespace does not apply to `outpost`."
+      - id: d
+        text: "A `ClusterRole` bound with a `RoleBinding` in `kube-system`."
+        explanation: "The binding grants access only in `kube-system`."
+    correct_option: b
+    explanation: "Correct. A `RoleBinding` limits a ClusterRole's rules to its own namespace."
+
+  - id: ats038-020-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Apply least privilege to an API permission scenario"
+    source_readings:
+      - sections/section-020/module-01/course-02-rbac-scope-and-least-privilege.md
+    prompt: "A pipeline must update Deployments in `orbit` and nothing else. Which grant follows least privilege?"
+    options:
+      - id: a
+        text: "The `edit` ClusterRole with a ClusterRoleBinding."
+        explanation: "`edit` is wide and the binding applies in every namespace."
+      - id: b
+        text: "A Role in `orbit` with `get`, `list`, `watch`, `update` and `patch` on `deployments` in the `apps` group, and a RoleBinding in `orbit`."
+        explanation: "Correct. It limits verbs, resource and namespace."
+      - id: c
+        text: "A Role in `orbit` with `*` on `*`."
+        explanation: "A wildcard grants every verb on every resource in the namespace."
+      - id: d
+        text: "The `cluster-admin` ClusterRole with a RoleBinding in `orbit`."
+        explanation: "This gives every verb on every resource in `orbit`, far more than needed."
+    correct_option: b
+    explanation: "Correct. It limits verbs, resource and namespace."
+
+  - id: ats038-020-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a Forbidden error and name the missing verb, resource, API group and namespace"
+    source_readings:
+      - sections/section-020/module-01/course-03-diagnosing-and-tightening-access.md
+    prompt: "A pipeline reports: `User \"system:serviceaccount:orbit:ci\" cannot delete resource \"deployments\" in API group \"apps\" in the namespace \"orbit\"`. What does the message tell you?"
+    options:
+      - id: a
+        text: "The token has expired and must be renewed."
+        explanation: "An expired token gives a `401`, not this message."
+      - id: b
+        text: "No rule allows the verb `delete` on `deployments` in the `apps` group in `orbit` for that user."
+        explanation: "Correct. The five parts of the message are the missing rule."
+      - id: c
+        text: "The Deployment `ci` does not exist in `orbit`."
+        explanation: "The message is about permission, not about a missing object."
+      - id: d
+        text: "Admission rejected the pod spec."
+        explanation: "An admission message names a policy or a pod field, not a missing verb."
+    correct_option: b
+    explanation: "Correct. The five parts of the message are the missing rule."
+
+  - id: ats038-020-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Check what an identity can do with kubectl auth can-i"
+    source_readings:
+      - sections/section-020/module-01/course-03-diagnosing-and-tightening-access.md
+    prompt: "Which command shows everything the service account `drifter` in `outpost` may do in the namespace `outpost`?"
+    options:
+      - id: a
+        text: "`kubectl auth can-i --list -n outpost --as=system:serviceaccount:outpost:drifter`"
+        explanation: "Correct. `--list` prints every allowed resource and verb for that identity."
+      - id: b
+        text: "`kubectl auth whoami`"
+        explanation: "This prints the identity of the current credential, not the permissions of another account."
+      - id: c
+        text: "`kubectl get rolebindings -n outpost`"
+        explanation: "This lists bindings but does not show the combined effective permissions."
+      - id: d
+        text: "`kubectl describe serviceaccount drifter -n outpost`"
+        explanation: "This shows the account's details, not its permissions."
+    correct_option: a
+    explanation: "Correct. `--list` prints every allowed resource and verb for that identity."
+
+  - id: ats038-020-q08
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain security context controls and their limits"
+    source_readings:
+      - sections/section-020/module-02/course-01-security-contexts-and-pod-admission.md
+    prompt: "Which setting makes the kubelet refuse to start a container whose user is root?"
+    options:
+      - id: a
+        text: "`readOnlyRootFilesystem: true`"
+        explanation: "This mounts the root filesystem read-only and does not check the user."
+      - id: b
+        text: "`runAsNonRoot: true`"
+        explanation: "Correct. The check reads the numeric user ID of the container."
+      - id: c
+        text: "`seccompProfile: RuntimeDefault`"
+        explanation: "This filters system calls and does not check the user."
+      - id: d
+        text: "`privileged: false`"
+        explanation: "This only means that the container is not privileged. A non-privileged container can still run as root."
+    correct_option: b
+    explanation: "Correct. The check reads the numeric user ID of the container."
+
+  - id: ats038-020-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Compare the Privileged, Baseline and Restricted Pod Security profiles"
+    source_readings:
+      - sections/section-020/module-02/course-01-security-contexts-and-pod-admission.md
+    prompt: "A pod sets no security context, but it has no privileged container, host namespaces or `hostPath` volumes. Which levels admit it?"
+    options:
+      - id: a
+        text: "Privileged only."
+        explanation: "Privileged admits it, and it is not the only level that does."
+      - id: b
+        text: "Privileged and Baseline, but not Restricted."
+        explanation: "Correct. Restricted also requires non-root, no privilege escalation, dropped capabilities and a seccomp profile."
+      - id: c
+        text: "All three levels."
+        explanation: "Restricted would reject it because it has no hardening settings."
+      - id: d
+        text: "None of the levels."
+        explanation: "Privileged and Baseline both admit it."
+    correct_option: b
+    explanation: "Correct. Restricted also requires non-root, no privilege escalation, dropped capabilities and a seccomp profile."
+
+  - id: ats038-020-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Enforce a level on a namespace and explain the enforce, audit and warn modes"
+    source_readings:
+      - sections/section-020/module-02/course-03-enforcing-pod-security-levels.md
+    prompt: "A namespace has `pod-security.kubernetes.io/enforce=baseline` and `pod-security.kubernetes.io/warn=restricted`. A pod breaks only the restricted rules. What happens?"
+    options:
+      - id: a
+        text: "The API server rejects the pod."
+        explanation: "The pod does not break baseline, so `enforce` does not reject it."
+      - id: b
+        text: "The API server admits the pod and returns a warning to the client."
+        explanation: "Correct. The `warn` mode accepts the pod and warns the client."
+      - id: c
+        text: "The API server admits the pod and stops existing pods."
+        explanation: "Pod Security admission never stops pods that already run."
+      - id: d
+        text: "The kubelet refuses to start the pod."
+        explanation: "Pod Security admission runs in the API server, before the pod reaches a node."
+    correct_option: b
+    explanation: "Correct. The `warn` mode accepts the pod and warns the client."
+
+  - id: ats038-020-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose a safer way to give a pod a credential and explain what base64 does and does not protect"
+    source_readings:
+      - sections/section-020/module-02/course-02-credentials-and-image-supply-chains.md
+    prompt: "A Secret value in a manifest looks like `dG9rZW4=`. What protects the value?"
+    options:
+      - id: a
+        text: "Base64 encoding makes it unreadable without a key."
+        explanation: "Base64 is an encoding that anyone can reverse."
+      - id: b
+        text: "Nothing in the encoding protects it. Access control and encryption at rest do."
+        explanation: "Correct. RBAC and etcd encryption at rest protect Secrets, not base64."
+      - id: c
+        text: "The `Opaque` type encrypts the data."
+        explanation: "`Opaque` only names the Secret type."
+      - id: d
+        text: "Kubernetes hashes it with sha256."
+        explanation: "Secret values are stored as data, not as hashes."
+    correct_option: b
+    explanation: "Correct. RBAC and etcd encryption at rest protect Secrets, not base64."
+
+  - id: ats038-020-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Distinguish an image vulnerability scan from a signature or digest check"
+    source_readings:
+      - sections/section-020/module-02/course-02-credentials-and-image-supply-chains.md
+    prompt: "Which statement about checking an image is correct?"
+    options:
+      - id: a
+        text: "A passing vulnerability scan proves that a trusted builder produced the image."
+        explanation: "A scan reads contents and says nothing about the builder."
+      - id: b
+        text: "A valid signature proves that the software has no known vulnerabilities."
+        explanation: "A signature proves origin and integrity, and a signed image can still be vulnerable."
+      - id: c
+        text: "A scan compares image contents with known flaws, and a signature verifies who built an exact digest."
+        explanation: "Correct. The two checks answer different questions."
+      - id: d
+        text: "A tag such as `6.15.0` always names the same image content."
+        explanation: "A registry can move a tag. A digest names exactly one image."
+    correct_option: c
+    explanation: "Correct. The two checks answer different questions."

@@ -1,0 +1,100 @@
+# Capstone starting state: a team namespace `orbit` with the beacon workload.
+# The faults are left in place on purpose:
+#  - ci-deployer has the built-in `edit` ClusterRole in every namespace.
+#  - beacon is privileged, has no hardening, mounts a service account token
+#    it does not use and reads the Secret through an environment variable.
+#  - the namespace has no Pod Security label.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: orbit
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: beacon
+  namespace: orbit
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ci-deployer
+  namespace: orbit
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: beacon-key
+  namespace: orbit
+type: Opaque
+stringData:
+  key: orbit-demo-key
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ci-deployer-edit
+subjects:
+  - kind: ServiceAccount
+    name: ci-deployer
+    namespace: orbit
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: orbit
+  labels:
+    app: beacon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      serviceAccountName: beacon
+      containers:
+        - name: beacon
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          env:
+            - name: BEACON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: beacon-key
+                  key: key
+          securityContext:
+            privileged: true
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beacon
+  namespace: orbit
+spec:
+  selector:
+    app: beacon
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

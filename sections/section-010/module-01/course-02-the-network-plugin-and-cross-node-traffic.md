@@ -10,6 +10,12 @@ Different plugins build the network in different ways. Calico, Cilium, Flannel a
 
 Two settings tell you where the work happens. The CNI configuration files live in `/etc/cni/net.d` on each node, and the plugin binaries live in `/opt/cni/bin`. Most plugins also run an agent as a DaemonSet in `kube-system`, one Pod per node.
 
+## What a CNI call does
+
+When a Pod starts, the runtime creates the network namespace first and the containers second. It then runs the plugin with the `ADD` command. The plugin creates a virtual Ethernet (veth) pair, which works like a cable with two ends. It places one end inside the Pod namespace, usually named `eth0`, and the other end on the node. It then assigns an IP address from the node block, sets the default route inside the Pod, and writes the routes or rules on the node.
+
+When the Pod is deleted, the runtime calls `DEL`, and the plugin releases the address so that another Pod can use it later. This is why an address can appear again on a different Pod after some time. It also explains why a Pod that starts before the plugin is ready stays in `ContainerCreating`: the runtime cannot finish the sandbox until the plugin answers.
+
 ## Each node owns a range of Pod addresses
 
 The cluster has one large Pod address range. The control plane splits it so that each node receives a smaller block, called the Pod CIDR (Classless Inter-Domain Routing block). The plugin allocates addresses for Pods on that node from the node's block. Because the blocks do not overlap, no two Pods get the same address.
@@ -67,6 +73,12 @@ kubectl describe pod -n starfleet -l app=shuttle
 ```
 
 Read the `Events` section at the bottom. On a healthy Pod you see the scheduling, image and start events and no network errors.
+
+## Why the plugin choice matters
+
+The CNI interface only covers attaching a Pod and releasing it. It says nothing about policy, encryption or observability. Those features come from the plugin itself and from agents that it runs on each node. When you compare plugins, ask three questions: how does it move packets between nodes, does it enforce NetworkPolicy, and does it replace the Service forwarding that `kube-proxy` normally does.
+
+Replacing the plugin on a running cluster is a disruptive change, because every Pod address comes from it. Teams choose the plugin when they build the cluster and keep it for the life of the cluster.
 
 ## What you now know
 

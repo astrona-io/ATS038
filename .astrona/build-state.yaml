@@ -1,0 +1,178 @@
+# Phase-3 build progress for ATS038 (2026-11-03). Everything is UNTESTED: static checks only.
+version: 1
+items:
+- key: section-010/module-01/playground
+  kind: playground
+  what: playground for Networking module 1
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-010/module-01/course
+  kind: course
+  what: landing + 3 parts + summary for Networking module 1
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-010/module-01/lab
+  kind: lab
+  what: graded lab for Networking module 1
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-010/module-02/playground
+  kind: playground
+  what: playground for Networking module 2
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-010/module-02/course
+  kind: course
+  what: landing + 3 parts + summary for Networking module 2
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-010/module-02/lab
+  kind: lab
+  what: graded lab for Networking module 2
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-010/module-03/playground
+  kind: playground
+  what: playground for Networking module 3
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-010/module-03/course
+  kind: course
+  what: landing + 3 parts + summary for Networking module 3
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-010/module-03/lab
+  kind: lab
+  what: graded lab for Networking module 3
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-010/capstone
+  kind: capstone
+  what: capstone lab for Networking
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok'
+- key: section-010/quiz
+  kind: quiz
+  what: quiz.yaml for Networking, 12 questions
+  status: done
+- key: section-020/module-01/playground
+  kind: playground
+  what: playground for Security module 1
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-020/module-01/course
+  kind: course
+  what: landing + 3 parts + summary for Security module 1
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-020/module-01/lab
+  kind: lab
+  what: graded lab for Security module 1
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-020/module-02/playground
+  kind: playground
+  what: playground for Security module 2
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-020/module-02/course
+  kind: course
+  what: landing + 3 parts + summary for Security module 2
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-020/module-02/lab
+  kind: lab
+  what: graded lab for Security module 2
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-020/capstone
+  kind: capstone
+  what: capstone lab for Security
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok'
+- key: section-020/quiz
+  kind: quiz
+  what: quiz.yaml for Security, 12 questions
+  status: done
+- key: section-030/module-01/playground
+  kind: playground
+  what: playground for Troubleshooting module 1
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-030/module-01/course
+  kind: course
+  what: landing + 3 parts + summary for Troubleshooting module 1
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-030/module-01/lab
+  kind: lab
+  what: graded lab for Troubleshooting module 1
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-030/module-02/playground
+  kind: playground
+  what: playground for Troubleshooting module 2
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-030/module-02/course
+  kind: course
+  what: landing + 3 parts + summary for Troubleshooting module 2
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-030/module-02/lab
+  kind: lab
+  what: graded lab for Troubleshooting module 2
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-030/capstone
+  kind: capstone
+  what: capstone lab for Troubleshooting
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok'
+- key: section-030/quiz
+  kind: quiz
+  what: quiz.yaml for Troubleshooting, 12 questions
+  status: done
+- key: section-040/module-01/playground
+  kind: playground
+  what: playground for Storage module 1
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-040/module-01/course
+  kind: course
+  what: landing + 3 parts + summary for Storage module 1
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-040/module-01/lab
+  kind: lab
+  what: graded lab for Storage module 1
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-040/module-02/playground
+  kind: playground
+  what: playground for Storage module 2
+  status: done
+  note: astrona validate ok; NOT booted
+- key: section-040/module-02/course
+  kind: course
+  what: landing + 3 parts + summary for Storage module 2
+  status: done
+  note: no live output captured; expected results described in words
+- key: section-040/module-02/lab
+  kind: lab
+  what: graded lab for Storage module 2
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok; astrona test not run'
+- key: section-040/capstone
+  kind: capstone
+  what: capstone lab for Storage
+  status: done
+  note: 'UNTESTED: astrona validate ok, bash -n ok'
+- key: section-040/quiz
+  kind: quiz
+  what: quiz.yaml for Storage, 12 questions
+  status: done
+- key: final-domain-quiz
+  kind: quiz
+  what: final domain quiz, 20 questions
+  status: done

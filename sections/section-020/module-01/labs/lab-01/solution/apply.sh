@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Applies the reference solution. Run only by `astrona test`.
+set -euo pipefail
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+kubectl apply -f "$DIR/solution.yaml"
+kubectl delete clusterrolebinding drifter-view
+kubectl -n starfleet patch deployment shuttle --type merge \
+  -p '{"spec":{"template":{"spec":{"automountServiceAccountToken":false}}}}'
+kubectl -n starfleet rollout status deployment/shuttle --timeout=180s
+echo "[solution] Applied."

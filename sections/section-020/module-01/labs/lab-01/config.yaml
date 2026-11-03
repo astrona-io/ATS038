@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Identity And Access (LAB). Graded against the live cluster. UNTESTED.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-lab-020-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - curlimages/curl:8.22.0
+
+# Starting state: the Starfleet workloads, a Role with the wrong API group
+# for probe, a cluster-wide view binding for drifter, and a shuttle pod that
+# mounts a token. The faults are left in place on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the workloads and the faulty access setup
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: probe-can-list-pods
+      description: probe can get, list and watch pods in starfleet
+      type: file
+      source: validation/validate-probe-can-list-pods.sh
+      hint: Pods are in the core API group, written as an empty string. The Role pod-lister names the apps group.
+    - name: probe-least-privilege
+      description: probe has no rights beyond reading pods in starfleet
+      type: file
+      source: validation/validate-probe-least-privilege.sh
+      hint: Fix the existing Role. Do not bind edit, admin or cluster-admin and do not use a wildcard.
+    - name: drifter-reads-outpost-only
+      description: drifter reads pods in outpost only, with no cluster-wide binding
+      type: file
+      source: validation/validate-drifter-reads-outpost-only.sh
+      hint: Create a RoleBinding in outpost to the view ClusterRole, then delete the ClusterRoleBinding drifter-view.
+    - name: shuttle-token-not-mounted
+      description: No shuttle pod has the service account token mounted
+      type: file
+      source: validation/validate-shuttle-token-not-mounted.sh
+      hint: Set automountServiceAccountToken to false in the shuttle pod template and wait for the new pod.
+    - name: workloads-running
+      description: All workloads and service accounts are still in place
+      type: file
+      source: validation/validate-workloads-running.sh
+      hint: Change access and the pod template only. Do not delete Deployments or service accounts.
+
+teardown:
+  keepCluster: false

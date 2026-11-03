@@ -1,0 +1,49 @@
+# Reference solution. apply.sh deletes the old StatefulSet first, because
+# volumeClaimTemplates cannot be edited on an existing StatefulSet, and deletes
+# the stuck claim report-cache, because storageClassName cannot be edited.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ledger
+  namespace: orbit
+spec:
+  serviceName: ledger
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ledger
+  template:
+    metadata:
+      labels:
+        app: ledger
+    spec:
+      containers:
+        - name: ledger
+          image: busybox:1.37
+          command: ["sh", "-c", "sleep 36000"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/ledger
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: report-cache
+  namespace: orbit
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi

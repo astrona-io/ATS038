@@ -1,0 +1,35 @@
+# Reference solution: the NodePort Service and the Ingress. The scout-public
+# Service is fixed by apply.sh with a patch.
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout-nodeport
+  namespace: starfleet
+spec:
+  type: NodePort
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: starfleet-web
+  namespace: starfleet
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: scout.starfleet.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: scout-public
+                port:
+                  number: 80

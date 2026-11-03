@@ -1,0 +1,89 @@
+# Starting state: the StatefulSet `ledger` keeps its data in an emptyDir, and
+# the Deployment `reporter` waits for a claim with a StorageClass that does not
+# exist. The faults stay on purpose.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: orbit
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ledger
+  namespace: orbit
+spec:
+  clusterIP: None
+  selector:
+    app: ledger
+  ports:
+    - name: tcp
+      port: 9000
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ledger
+  namespace: orbit
+spec:
+  serviceName: ledger
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ledger
+  template:
+    metadata:
+      labels:
+        app: ledger
+    spec:
+      containers:
+        - name: ledger
+          image: busybox:1.37
+          command: ["sh", "-c", "sleep 36000"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/ledger
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: report-cache
+  namespace: orbit
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reporter
+  namespace: orbit
+  labels:
+    app: reporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reporter
+  template:
+    metadata:
+      labels:
+        app: reporter
+    spec:
+      containers:
+        - name: reporter
+          image: busybox:1.37
+          command: ["sh", "-c", "sleep 36000"]
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: report-cache

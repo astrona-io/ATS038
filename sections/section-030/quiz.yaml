@@ -1,0 +1,277 @@
+# Knowledge check for section 030. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats038-030
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: Troubleshooting
+questions:
+- id: ats038-030-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Use pod phase, conditions and events to name the lifecycle stage where a pod stopped.
+  source_readings:
+  - sections/section-030/module-01/course-01-placement-and-dependency-evidence.md
+  prompt: The pod `lander` stays `Pending`. `kubectl get pods -o wide` shows `<none>` in the `NODE` column. Which component has not finished its work, and where is the reason recorded?
+  options:
+  - id: a
+    text: The kubelet, in the container logs.
+    explanation: The kubelet only acts after a node is assigned. A pod with no node has no container and no logs.
+  - id: b
+    text: The scheduler, in a `FailedScheduling` event on the pod.
+    explanation: The scheduler assigns a node. A pod with no node was not placed, and the scheduler records the reason in a `FailedScheduling` event.
+  - id: c
+    text: The container runtime, in the exit code.
+    explanation: An exit code exists only for a container that has started, and this pod has no container.
+  - id: d
+    text: The Service controller, in the EndpointSlice.
+    explanation: EndpointSlices list addresses of Ready pods behind a Service and do not explain placement.
+  correct_option: b
+  explanation: The scheduler assigns a node. A pod with no node was not placed, and the scheduler records the reason in a `FailedScheduling` event.
+- id: ats038-030-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read a FailedScheduling event and name the node selector, taint or resource request behind it.
+  source_readings:
+  - sections/section-030/module-01/course-01-placement-and-dependency-evidence.md
+  prompt: 'A `FailedScheduling` event says `0/1 nodes are available: 1 node(s) didn''t match Pod''s node selector`. The Deployment asks for `disktype: quantum`, and no node has that label. What is the best fix when the selector was a mistake?'
+  options:
+  - id: a
+    text: Add the toleration `disktype=quantum` to the pod.
+    explanation: A toleration answers a taint. A node selector is a label match and is not affected by tolerations.
+  - id: b
+    text: Label the node `disktype=quantum` to make the pod fit.
+    explanation: This makes the pod run, but it states that the node has a property it does not have. Labelling a node is right only when the node really has the property.
+  - id: c
+    text: Remove or correct the `nodeSelector` in the pod template.
+    explanation: The selector is the wrong rule, so correcting it in the pod template matches the evidence and changes one thing.
+  - id: d
+    text: Raise the memory limit of the container.
+    explanation: Limits are not used by the scheduler, and the event is about a selector.
+  correct_option: c
+  explanation: The selector is the wrong rule, so correcting it in the pod template matches the evidence and changes one thing.
+- id: ats038-030-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read a FailedScheduling event and name the node selector, taint or resource request behind it.
+  source_readings:
+  - sections/section-030/module-01/course-01-placement-and-dependency-evidence.md
+  prompt: A pod requests 64 CPUs on a node with 4 allocatable CPUs. The application would use almost no CPU. What happens?
+  options:
+  - id: a
+    text: The pod is scheduled and its readiness probe fails.
+    explanation: Probes run only after the container is running on a node.
+  - id: b
+    text: The pod is scheduled and throttled to 4 CPUs.
+    explanation: Throttling is an effect of a CPU limit at run time. The scheduler never placed this pod.
+  - id: c
+    text: The pod is scheduled and killed with `OOMKilled`.
+    explanation: "`OOMKilled` is about memory limits of a running container."
+  - id: d
+    text: The pod stays `Pending` with an `Insufficient cpu` event.
+    explanation: The scheduler compares requests, not real usage, with allocatable capacity. No node fits 64 CPUs, so the pod is not scheduled.
+  correct_option: d
+  explanation: The scheduler compares requests, not real usage, with allocatable capacity. No node fits 64 CPUs, so the pod is not scheduled.
+- id: ats038-030-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain ErrImagePull, ImagePullBackOff, CrashLoopBackOff and OOMKilled, and find the exit code and the previous logs.
+  source_readings:
+  - sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+  prompt: The pod status is `ImagePullBackOff`. The pod event says the manifest for `podinfo:6.15.999` was not found. What is the cause?
+  options:
+  - id: a
+    text: The node has no free memory.
+    explanation: Memory is not used for pulls, and this error names a manifest.
+  - id: b
+    text: The readiness probe path is wrong.
+    explanation: Probes run after the image is pulled and the container starts.
+  - id: c
+    text: The tag does not exist in the registry.
+    explanation: A manifest that is not found means the registry has no such tag or image. `ImagePullBackOff` is the wait before the next try.
+  - id: d
+    text: The container exits with code 1.
+    explanation: A container exit code exists only for a container that has started.
+  correct_option: c
+  explanation: A manifest that is not found means the registry has no such tag or image. `ImagePullBackOff` is the wait before the next try.
+- id: ats038-030-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain ErrImagePull, ImagePullBackOff, CrashLoopBackOff and OOMKilled, and find the exit code and the previous logs.
+  source_readings:
+  - sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+  prompt: A pod shows `CrashLoopBackOff`. Which command gives the most direct evidence of why the last container run ended?
+  options:
+  - id: a
+    text: "`kubectl get nodes`"
+    explanation: Nodes show node health. They do not show how one container ended.
+  - id: b
+    text: "`kubectl logs <pod> --previous` and the last exit code"
+    explanation: "`CrashLoopBackOff` is the wait between restarts. The logs of the previous container and its exit code show why it ended."
+  - id: c
+    text: "`kubectl delete pod <pod>`"
+    explanation: Deleting the pod creates a new pod and removes the evidence.
+  - id: d
+    text: "`kubectl get svc`"
+    explanation: Services do not report how a container ended.
+  correct_option: b
+  explanation: "`CrashLoopBackOff` is the wait between restarts. The logs of the previous container and its exit code show why it ended."
+- id: ats038-030-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain ErrImagePull, ImagePullBackOff, CrashLoopBackOff and OOMKilled, and find the exit code and the previous logs.
+  source_readings:
+  - sections/section-030/module-01/course-02-image-preparation-and-container-startup.md
+  prompt: A container terminates with reason `OOMKilled` and exit code `137`. Which statement is correct?
+  options:
+  - id: a
+    text: The kernel killed it because it used more memory than its memory limit.
+    explanation: The kernel enforces memory limits, and exceeding the limit ends the container with `OOMKilled`.
+  - id: b
+    text: The scheduler removed it because the memory request was too high.
+    explanation: The scheduler acts before start. It never kills a running container for a request.
+  - id: c
+    text: The kubelet restarted it because its liveness probe failed.
+    explanation: A liveness failure restarts the container, but the reason is not `OOMKilled`.
+  - id: d
+    text: The container runtime could not pull the image.
+    explanation: A pull failure never starts a container, so there is no exit code.
+  correct_option: a
+  explanation: The kernel enforces memory limits, and exceeding the limit ends the container with `OOMKilled`.
+- id: ats038-030-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what readiness, liveness and startup probes do and what a failing probe causes.
+  source_readings:
+  - sections/section-030/module-01/course-03-probes-and-safe-corrective-changes.md
+  prompt: 'A pod is `Running` and shows `0/1` in the `READY` column. The events show `Readiness probe failed: HTTP probe failed with statuscode: 404`. What does the Kubernetes system do?'
+  options:
+  - id: a
+    text: It restarts the container.
+    explanation: Restarts are the result of a failing liveness probe, not of a readiness probe.
+  - id: b
+    text: It removes the pod from Service endpoints and does not restart it.
+    explanation: A failing readiness probe makes the pod not Ready, so Services stop sending traffic to it. The container keeps running.
+  - id: c
+    text: It deletes the pod and its Deployment.
+    explanation: No probe deletes a Deployment.
+  - id: d
+    text: It moves the pod to another node.
+    explanation: Probes never move a pod to a node. Only a new pod can be scheduled elsewhere.
+  correct_option: b
+  explanation: A failing readiness probe makes the pod not Ready, so Services stop sending traffic to it. The container keeps running.
+- id: ats038-030-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose the evidence to collect before a change, change one thing, and verify or roll back.
+  source_readings:
+  - sections/section-030/module-01/course-03-probes-and-safe-corrective-changes.md
+  prompt: A change to a Deployment's pod template made things worse. Which action restores the previous pod template?
+  options:
+  - id: a
+    text: "`kubectl delete pod` on every pod"
+    explanation: Deleting pods only makes the controller create new pods from the same bad template.
+  - id: b
+    text: "`kubectl rollout status deployment/<name>`"
+    explanation: "`rollout status` waits for and reports the rollout. It changes nothing."
+  - id: c
+    text: "`kubectl get events`"
+    explanation: Events only show records. They change nothing.
+  - id: d
+    text: "`kubectl rollout undo deployment/<name>`"
+    explanation: The Deployment keeps earlier ReplicaSets as revisions, and `rollout undo` returns to the previous one.
+  correct_option: d
+  explanation: The Deployment keeps earlier ReplicaSets as revisions, and `rollout undo` returns to the previous one.
+- id: ats038-030-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish a node problem from a single workload problem.
+  source_readings:
+  - sections/section-030/module-02/course-01-node-health-and-shared-dependencies.md
+  prompt: Pods on one node all fail at the same time. Pods on other nodes are healthy. Which evidence is the best next step?
+  options:
+  - id: a
+    text: The logs of one application.
+    explanation: One application's logs explain one workload. The pattern points at what the pods share.
+  - id: b
+    text: The conditions of that node in `kubectl describe node`.
+    explanation: Pods that fail together on one node point at the node. Its conditions (`Ready`, `MemoryPressure`, `DiskPressure`) are the evidence.
+  - id: c
+    text: The selector of one Service.
+    explanation: A selector explains traffic to a Service, not a whole node failing.
+  - id: d
+    text: The tag of one image.
+    explanation: An image tag explains one Deployment, not all pods on a node.
+  correct_option: b
+  explanation: Pods that fail together on one node point at the node. Its conditions (`Ready`, `MemoryPressure`, `DiskPressure`) are the evidence.
+- id: ats038-030-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain how storage and resource pressure affect workloads.
+  source_readings:
+  - sections/section-030/module-02/course-01-node-health-and-shared-dependencies.md
+  prompt: A pod mounts a claim and stays `Pending`. The claim is `Pending` and its event says the StorageClass `missing-class` was not found. Where is the fix?
+  options:
+  - id: a
+    text: 'In CoreDNS: restart the pods.'
+    explanation: DNS is not part of claim binding.
+  - id: b
+    text: 'In the node: add a taint.'
+    explanation: A taint restricts scheduling and does not create storage.
+  - id: c
+    text: 'In the pod: raise its memory limit.'
+    explanation: Memory limits do not affect binding a claim.
+  - id: d
+    text: 'In the claim: create it again with a StorageClass that exists.'
+    explanation: The pod waits for the claim and the claim waits for a class that does not exist. A claim's `storageClassName` cannot be changed, so create the claim again with a valid class.
+  correct_option: d
+  explanation: The pod waits for the claim and the claim waits for a class that does not exist. A claim's `storageClassName` cannot be changed, so create the claim again with a valid class.
+- id: ats038-030-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Separate DNS resolution from Service backend connectivity.
+  source_readings:
+  - sections/section-030/module-02/course-02-tracing-a-service-request.md
+  prompt: A Service `probe` has an empty EndpointSlice. Its pod is Running and Ready and carries the label `app=probe`. The Service selector is `app=probes`. What is the cause and the fix?
+  options:
+  - id: a
+    text: The `targetPort` is wrong. Change the pod port.
+    explanation: A wrong `targetPort` gives an endpoint with the wrong port, not an empty slice.
+  - id: b
+    text: CoreDNS is down. Restart it.
+    explanation: A DNS failure stops the name lookup. Here the Service exists and has a ClusterIP, and the slice is empty.
+  - id: c
+    text: The selector matches no pod. Correct the selector in the Service.
+    explanation: A Service lists only Ready pods that match its selector. No pod has `app=probes`, so the Service has no endpoints. The pod is correct, so change the Service.
+  - id: d
+    text: The readiness probe is wrong. Remove it.
+    explanation: The pod is Ready, so its probe is not the cause.
+  correct_option: c
+  explanation: A Service lists only Ready pods that match its selector. No pod has `app=probes`, so the Service has no endpoints. The pod is correct, so change the Service.
+- id: ats038-030-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Separate DNS resolution from Service backend connectivity.
+  source_readings:
+  - sections/section-030/module-02/course-03-dns-resolution-and-debug-containers.md
+  prompt: A client in `outpost` runs `curl http://scout` and gets exit code 6. The same request with `http://scout.starfleet` returns HTTP 200. What explains this?
+  options:
+  - id: a
+    text: The node has `DiskPressure`.
+    explanation: Node pressure does not change name resolution and would not make the second request succeed.
+  - id: b
+    text: The `scout` pod is not Ready.
+    explanation: A pod that is not Ready would give a refused connection, not an unresolved host. The qualified name works.
+  - id: c
+    text: The Service has no endpoints.
+    explanation: With no endpoints, the connection fails after the name resolves. Exit code 6 means the name did not resolve.
+  - id: d
+    text: A short Service name resolves only in the namespace of the client.
+    explanation: The search list adds the client's own namespace, so `scout` becomes `scout.outpost.svc.cluster.local`, which does not exist. Adding the namespace fixes the lookup.
+  correct_option: d
+  explanation: The search list adds the client's own namespace, so `scout` becomes `scout.outpost.svc.cluster.local`, which does not exist. Adding the namespace fixes the lookup.

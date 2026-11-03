@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Security Capstone (LAB). Graded against the live cluster. UNTESTED.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-capstone-020
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - busybox:1.37
+
+# Starting state: a new team namespace `orbit` with the beacon workload, a
+# ci-deployer service account bound to the edit ClusterRole in every
+# namespace, and no Pod Security label. The faults are left in place on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the orbit namespace and the faulty setup
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: ci-deployer-updates-deployments
+      description: ci-deployer reads and updates Deployments in orbit
+      type: file
+      source: validation/validate-ci-deployer-updates-deployments.sh
+      hint: Create a Role in orbit for deployments (apps) with get, list, watch, update and patch, and a RoleBinding to the service account.
+    - name: ci-deployer-least-privilege
+      description: ci-deployer has no other rights
+      type: file
+      source: validation/validate-ci-deployer-least-privilege.sh
+      hint: Use a Role and a RoleBinding in orbit only. Do not bind edit, admin or cluster-admin, and do not use a wildcard.
+    - name: ci-deployer-no-cluster-binding
+      description: No ClusterRoleBinding names ci-deployer
+      type: file
+      source: validation/validate-ci-deployer-no-cluster-binding.sh
+      hint: Find the ClusterRoleBinding that names ci-deployer and delete it. Keep the service account.
+    - name: beacon-hardened
+      description: beacon is unprivileged, hardened and has no service account token
+      type: file
+      source: validation/validate-beacon-hardened.sh
+      hint: Set privileged false, runAsNonRoot with a numeric runAsUser, allowPrivilegeEscalation false, readOnlyRootFilesystem true, drop ALL and automountServiceAccountToken false.
+    - name: beacon-secret-as-volume
+      description: beacon reads the beacon-key Secret from a read-only volume
+      type: file
+      source: validation/validate-beacon-secret-as-volume.sh
+      hint: Remove the BEACON_KEY variable. Mount a secret volume for beacon-key read-only.
+    - name: orbit-baseline-and-beacon-running
+      description: orbit enforces baseline and beacon is running
+      type: file
+      source: validation/validate-orbit-baseline-and-beacon-running.sh
+      hint: Label the namespace pod-security.kubernetes.io/enforce=baseline and wait for the beacon rollout.
+
+teardown:
+  keepCluster: false

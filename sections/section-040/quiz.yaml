@@ -1,0 +1,317 @@
+# Knowledge check for section 040. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats038-040
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: section
+  id: section-040
+  title: Storage
+questions:
+- id: ats038-040-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Compare container-local, ephemeral and persistent storage lifecycles
+  source_readings:
+  - sections/section-040/module-01/course-01-container-filesystem-and-ephemeral-volumes.md
+  prompt: A container in the `scout` Pod writes a file to `/tmp` and another to an
+    `emptyDir` volume mounted at `/scratch`. The container process exits with an error
+    and the kubelet restarts it in the same Pod. Which files exist afterwards?
+  options:
+  - id: a
+    text: Only the file in `/tmp`.
+    explanation: The container layer belongs to one container instance, so a restart
+      deletes it.
+  - id: b
+    text: Both files.
+    explanation: The file in `/tmp` was in the container layer, which the restart
+      deletes.
+  - id: c
+    text: Only the file in `/scratch`.
+    explanation: Correct. The `emptyDir` belongs to the Pod and survives a container
+      restart. The writable container layer does not.
+  - id: d
+    text: Neither file.
+    explanation: The `emptyDir` is kept while the Pod stays on the node.
+  correct_option: c
+  explanation: Correct. The `emptyDir` belongs to the Pod and survives a container
+    restart. The writable container layer does not.
+- id: ats038-040-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain the PersistentVolume and PersistentVolumeClaim relationship
+  source_readings:
+  - sections/section-040/module-01/course-02-persistentvolumes-and-claims.md
+  prompt: Which statement about a PersistentVolume (PV) and a PersistentVolumeClaim
+    (PVC) is correct?
+  options:
+  - id: a
+    text: A PVC has no namespace and a PV belongs to a namespace.
+    explanation: It is the other way round.
+  - id: b
+    text: A Pod names a PV in its `volumes` list.
+    explanation: A Pod names a PVC and never a PV.
+  - id: c
+    text: A PV is a cluster-level object that describes storage, and a PVC is a namespaced
+      request that a Pod names.
+    explanation: Correct. The claim stands between the Pod and the volume.
+  - id: d
+    text: Several PVCs can bind to one PV at the same time.
+    explanation: A PV binds to exactly one claim.
+  correct_option: c
+  explanation: Correct. The claim stands between the Pod and the volume.
+- id: ats038-040-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the PersistentVolume and PersistentVolumeClaim relationship
+  source_readings:
+  - sections/section-040/module-01/course-02-persistentvolumes-and-claims.md
+  prompt: 'A claim requests `500Mi` with `ReadWriteOnce` and `storageClassName: manual`.
+    The only available PV offers `1Gi`, `ReadWriteOnce` and the class `manual`. What
+    happens?'
+  options:
+  - id: a
+    text: The claim binds to the PV and shows the PV capacity of 1Gi.
+    explanation: Correct. A PV that is at least as large as the request can bind.
+      The claim receives the whole volume.
+  - id: b
+    text: The claim stays `Pending` because the sizes differ.
+    explanation: A larger PV matches a smaller request.
+  - id: c
+    text: The PV is split and the claim gets 500Mi.
+    explanation: A PV is never split between claims.
+  - id: d
+    text: The claim binds, and the PV capacity changes to 500Mi.
+    explanation: Binding does not change the capacity of the PV.
+  correct_option: a
+  explanation: Correct. A PV that is at least as large as the request can bind. The
+    claim receives the whole volume.
+- id: ats038-040-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Describe StorageClass-based dynamic provisioning
+  source_readings:
+  - sections/section-040/module-01/course-03-storageclasses-provisioning-and-csi.md
+  prompt: 'A claim uses a StorageClass with `volumeBindingMode: WaitForFirstConsumer`
+    and no Pod uses the claim yet. What status does the claim show, and why?'
+  options:
+  - id: a
+    text: "`Bound`, because the provisioner creates the volume at once."
+    explanation: That is the `Immediate` mode.
+  - id: b
+    text: "`Lost`, because no volume exists."
+    explanation: "`Lost` means the volume of a bound claim disappeared."
+  - id: c
+    text: "`Failed`, because no Pod uses it."
+    explanation: Waiting for a Pod is normal and not a failure.
+  - id: d
+    text: "`Pending`, because the volume is created after the scheduler picks a node
+      for a Pod that uses the claim."
+    explanation: Correct. The volume is created where the Pod will run.
+  correct_option: d
+  explanation: Correct. The volume is created where the Pod will run.
+- id: ats038-040-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Describe StorageClass-based dynamic provisioning
+  source_readings:
+  - sections/section-040/module-01/course-03-storageclasses-provisioning-and-csi.md
+  prompt: A developer creates a claim that names the StorageClass `fast`, but no class
+    with that name exists. The claim stays `Pending`. What is the correct fix?
+  options:
+  - id: a
+    text: Edit `storageClassName` on the claim to `standard`.
+    explanation: The field cannot be changed on an existing claim.
+  - id: b
+    text: Delete the claim and create it again with an existing class.
+    explanation: Correct. The class of a claim is fixed, so the claim must be re-created.
+  - id: c
+    text: Restart the kube-scheduler.
+    explanation: The scheduler does not provision volumes.
+  - id: d
+    text: Wait until the provisioner creates the class.
+    explanation: A provisioner does not create StorageClass objects.
+  correct_option: b
+  explanation: Correct. The class of a claim is fixed, so the claim must be re-created.
+- id: ats038-040-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify the CSI driver's role in storage operations
+  source_readings:
+  - sections/section-040/module-01/course-03-storageclasses-provisioning-and-csi.md
+  prompt: Which statement describes the role of a Container Storage Interface (CSI)
+    driver?
+  options:
+  - id: a
+    text: It schedules Pods onto nodes that have free disk space.
+    explanation: Scheduling is done by the kube-scheduler.
+  - id: b
+    text: It implements storage operations such as create, attach, mount, resize and
+      snapshot for one storage system through a standard interface.
+    explanation: Correct. The controller plugin and the node plugin split the work,
+      and sidecar containers connect the driver to the API.
+  - id: c
+    text: It replaces the API server for storage objects.
+    explanation: The API server still stores the objects.
+  - id: d
+    text: It encrypts every volume in the cluster.
+    explanation: Encryption is a feature of a particular driver or backend, not the
+      CSI role.
+  correct_option: b
+  explanation: Correct. The controller plugin and the node plugin split the work,
+    and sidecar containers connect the driver to the API.
+- id: ats038-040-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why a StatefulSet uses volumeClaimTemplates
+  source_readings:
+  - sections/section-040/module-01/course-03-storageclasses-provisioning-and-csi.md
+  prompt: A StatefulSet has 3 replicas and a `volumeClaimTemplates` entry named `data`.
+    The Pod `probe-1` is deleted and re-created. Which volume does the new Pod mount?
+  options:
+  - id: a
+    text: The claim `data-probe-1`, the same claim as before.
+    explanation: Correct. The claim name contains the ordinal, so the replacement
+      Pod finds its own data.
+  - id: b
+    text: A new empty claim, because the Pod is new.
+    explanation: The StatefulSet controller reuses the existing claim.
+  - id: c
+    text: The claim `data-probe-0`, because it was created first.
+    explanation: Each replica has its own claim.
+  - id: d
+    text: An `emptyDir`, because StatefulSets do not use claims.
+    explanation: "`volumeClaimTemplates` creates one claim per replica."
+  correct_option: a
+  explanation: Correct. The claim name contains the ordinal, so the replacement Pod
+    finds its own data.
+- id: ats038-040-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish ReadWriteOnce from ReadWriteOncePod
+  source_readings:
+  - sections/section-040/module-02/course-01-access-modes-and-data-presentation.md
+  prompt: An application corrupts its data if two instances write at the same time,
+    and the cluster has many nodes. Which access mode refuses a second Pod anywhere
+    in the cluster?
+  options:
+  - id: a
+    text: "`ReadWriteOnce`"
+    explanation: This mode only limits the number of nodes.
+  - id: b
+    text: "`ReadOnlyMany`"
+    explanation: This mode is read-only and for many nodes.
+  - id: c
+    text: "`ReadWriteOncePod`"
+    explanation: Correct. Only one Pod in the whole cluster can use the claim. A CSI
+      driver must support it.
+  - id: d
+    text: "`ReadWriteMany`"
+    explanation: This mode allows many nodes to write.
+  correct_option: c
+  explanation: Correct. Only one Pod in the whole cluster can use the claim. A CSI
+    driver must support it.
+- id: ats038-040-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Predict Retain and Delete reclaim policy behavior
+  source_readings:
+  - sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
+  prompt: The PV behind a claim has the reclaim policy `Retain`. A user deletes the
+    claim. What is the state of the PV?
+  options:
+  - id: a
+    text: The PV and its storage are deleted.
+    explanation: That is `Delete`.
+  - id: b
+    text: The PV is `Available` and a new claim can bind it at once.
+    explanation: The old `claimRef` still blocks a new binding.
+  - id: c
+    text: The PV is `Released`, the data stays, and the PV does not bind to a new
+      claim until `claimRef` is removed.
+    explanation: Correct. An administrator decides how to reclaim a retained volume.
+  - id: d
+    text: The PV is `Failed` because its claim is gone.
+    explanation: "`Failed` means that automatic reclamation failed."
+  correct_option: c
+  explanation: Correct. An administrator decides how to reclaim a retained volume.
+- id: ats038-040-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Predict Retain and Delete reclaim policy behavior
+  source_readings:
+  - sections/section-040/module-02/course-02-reclaim-policies-and-recovery.md
+  prompt: A dynamically provisioned volume has the policy `Delete`. An administrator
+    wants to keep its data before the claim is deleted. What is the correct step?
+  options:
+  - id: a
+    text: 'Patch the PV with `persistentVolumeReclaimPolicy: Retain` before the claim
+      is deleted.'
+    explanation: Correct. The policy is a field of the PV and the control plane reads
+      it when the claim is deleted.
+  - id: b
+    text: 'Patch the claim with `persistentVolumeReclaimPolicy: Retain`.'
+    explanation: The field belongs to the PV, not the claim.
+  - id: c
+    text: Delete the claim first and patch the PV afterwards.
+    explanation: With `Delete`, the PV and the storage are already removed.
+  - id: d
+    text: Delete the Pod, which switches the policy to `Retain`.
+    explanation: Deleting a Pod never changes a reclaim policy.
+  correct_option: a
+  explanation: Correct. The policy is a field of the PV and the control plane reads
+    it when the claim is deleted.
+- id: ats038-040-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain when a claim can be expanded and which components do
+    the work
+  source_readings:
+  - sections/section-040/module-02/course-03-expansion-snapshots-and-data-protection.md
+  prompt: A claim of 1Gi must grow to 2Gi. The request is rejected by the API server.
+    Which cause is most likely?
+  options:
+  - id: a
+    text: 'The StorageClass does not set `allowVolumeExpansion: true`.'
+    explanation: Correct. Expansion needs that field. A claim also can never shrink.
+  - id: b
+    text: The claim has the wrong reclaim policy.
+    explanation: The reclaim policy does not affect expansion.
+  - id: c
+    text: The Pod that uses the claim is running.
+    explanation: Running Pods do not block the edit.
+  - id: d
+    text: The PV has the access mode `ReadWriteOnce`.
+    explanation: The access mode does not block expansion.
+  correct_option: a
+  explanation: Correct. Expansion needs that field. A claim also can never shrink.
+- id: ats038-040-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why persistence, replication and backup are different
+    properties
+  source_readings:
+  - sections/section-040/module-02/course-03-expansion-snapshots-and-data-protection.md
+  prompt: A table is dropped by mistake. The volume is on a replicated storage system,
+    and the claim has the policy `Retain`. What restores the table?
+  options:
+  - id: a
+    text: The replica, because replication keeps a second copy.
+    explanation: Replication copies the deletion to the replica.
+  - id: b
+    text: The `Retain` policy, because it keeps the PV.
+    explanation: "`Retain` keeps the volume, but the volume no longer holds the table."
+  - id: c
+    text: A backup taken before the mistake.
+    explanation: Correct. A backup is a separate, older copy that recovers an earlier
+      state.
+  - id: d
+    text: A larger claim through volume expansion.
+    explanation: Expansion adds space and does not restore data.
+  correct_option: c
+  explanation: Correct. A backup is a separate, older copy that recovers an earlier
+    state.

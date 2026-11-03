@@ -1,0 +1,14 @@
+# The faulty Service. The selector matches no Pod and the targetPort is wrong.
+# Left in place on purpose.
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout-public
+  namespace: starfleet
+spec:
+  selector:
+    app: scout-v2
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

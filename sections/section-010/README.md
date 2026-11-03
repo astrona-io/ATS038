@@ -1,25 +1,20 @@
----
-draft: true
-exam_objectives:
-  - Networking
----
 # Networking
 
-This section teaches pod networking; services and external access; traffic control. These ideas help you explain system behavior and choose a suitable approach in a KCNA scenario.
+This section teaches how traffic moves in a Kubernetes cluster and how to control it. It starts with the Pod address and the network plugin, continues with DNS and Services, and ends with NetworkPolicy and transport security. Each topic is practised in a playground on a single-node `kind` cluster that runs Kubernetes 1.35.
 
-You will work through Pod Networking, Services And External Access, Traffic Control. Each module introduces its goals, teaches the concepts through examples, and closes with a summary. An original YAML question bank is prepared for the end of the section, with answer explanations for future quiz integration.
+You work through three modules. Pod Networking explains Pod addresses, the network model, the Container Network Interface and cluster DNS. Services And External Access explains selectors, EndpointSlices, the Service types, Ingress and the Gateway API. Traffic Control explains NetworkPolicy, egress and DNS rules, service meshes and TLS certificates. Each module has a playground, a graded lab and a summary. A capstone lab closes the section, followed by a knowledge check.
+
+The labs in this section were written from documentation and have not been run yet.
 
 ## Learning Outcomes
 
-- Explain Pod addresses and communication in the Kubernetes network model.
+- Explain that each Pod has one IP address and describe the Kubernetes network model.
 - Identify the network plugin's role and the CNI interface.
-- Explain Service discovery through DNS.
-- Distinguish name resolution from application reachability.
-- Explain Service selectors, ports and EndpointSlices.
-- Compare ClusterIP, NodePort and LoadBalancer Services.
-- Distinguish Ingress from a Service and its implementation.
-- Explain the role separation in the Gateway API.
-- Explain how NetworkPolicy selects and isolates Pods.
-- Predict whether both traffic directions permit a connection.
-- Distinguish network policy from service mesh capabilities.
-- Explain TLS encryption and certificate verification.
+- Explain how Service names resolve through CoreDNS.
+- Distinguish a name that does not resolve from an address that does not answer.
+- Explain how Service selectors, ports and EndpointSlices decide where a request goes.
+- Compare ClusterIP, NodePort, LoadBalancer, headless and ExternalName Services.
+- Distinguish an Ingress from a Service and from an Ingress controller, and describe the Gateway API roles.
+- Explain how NetworkPolicy selects and isolates Pods, including egress and DNS rules.
+- Predict whether a connection works when ingress and egress policies both apply.
+- Distinguish NetworkPolicy from a service mesh and explain what TLS certificates prove.

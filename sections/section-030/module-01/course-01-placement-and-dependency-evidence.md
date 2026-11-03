@@ -1,39 +1,98 @@
----
-draft: true
-exam_objectives:
-  - Troubleshooting
----
 # Placement And Dependency Evidence
 
-The `scout` workload is unavailable, and its Pod is Pending. That observation is a starting point, not a diagnosis. Troubleshooting means forming an explanation from evidence, making a focused correction and checking whether the expected behavior returns.
+You apply a Deployment and, a minute later, its pod is still `Pending`. Nothing has crashed and nothing has been pulled, because the pod has not even reached a node. This part explains the pod lifecycle, the fields that record it, and the two most common reasons the scheduler cannot place a pod: a node selector and a resource request.
 
-Read desired state, observed state and timing together. A controller may not have created the requested replicas yet. A created Pod may not have a node assignment. An assigned Pod may still be waiting for an image, a volume or initialization. Each stage has different responsible components and dependencies.
+## The pod lifecycle and its evidence
 
-Events can expose a scheduler's failed placement decision. Insufficient requested resources, unmatched affinity and untolerated taints are distinct reasons that need distinct remedies. Removing all placement controls may make a Pod run while violating the original operating requirement, so a fix must preserve the intended behavior.
+A pod moves through a fixed set of stages. The API server stores the pod object. The scheduler (`kube-scheduler`, the control plane component that picks a node for each new pod) chooses a node and writes it into the pod. The kubelet (the agent on each node) then pulls the images, creates the containers and starts them. Finally the kubelet runs the probes that decide whether the pod is Ready.
 
-A missing or unbound persistent claim can also block progress. Storage binding and scheduling can depend on each other when provisioning waits for a suitable consumer location. That relationship is different from a registry authentication problem, even though both can keep an application from starting.
+```mermaid
+flowchart TB
+    A["pod created"] -->|"scheduler"| B["node assigned"]
+    B -->|"kubelet pulls images"| C["containers created"]
+    C -->|"container runtime"| D["containers running"]
+    D -->|"readiness probe passes"| E["pod Ready"]
+```
 
-Conditions add structured detail, while container waiting reasons describe preparation or execution state. Events are time-sensitive and may expire or aggregate repeated occurrences. Compare their timestamps with the latest change rather than treating an old failure as the current explanation.
+The diagram shows the order of the stages and that a different component owns each step, so a failure at one stage points at one component.
 
-A useful diagnostic sequence narrows the stage before changing settings: confirm the target object and namespace, inspect the controlling workload, check placement, then check startup dependencies. If no node can satisfy a required condition, application logs cannot explain a process that has never run.
+Three kinds of evidence record these stages. The **phase** (`.status.phase`) is a short summary: `Pending` (accepted but not all containers are running), `Running`, `Succeeded`, `Failed` or `Unknown`. The **conditions** (`.status.conditions`) are finer: `PodScheduled`, `Initialized`, `ContainersReady` and `Ready`, each `True` or `False` with a reason. The **events** are short records that components such as the scheduler and the kubelet write about the pod. Events are the most useful of the three, because they carry the reason in words.
 
-## Comparing Three Pending Scenarios
+## Reading a pod that stays Pending
 
-In the first scenario, `scout` requests more memory than any eligible node can provide. Scheduling events report insufficient resources and the Pod lacks an assignment. The relevant correction is capacity or justified sizing. Application log changes cannot explain a process that never started.
+Run the playground's first command. The `-o wide` flag adds the node name, which is empty for a pod that was never scheduled:
 
-In the second scenario, a required node label is absent. A large unlabelled node does not help because resource capacity is not the failed condition. Creating a suitable node or correcting an unintended selector can address the requirement. Removing a necessary hardware rule merely to make the status change would produce an unsuitable placement.
+<!-- astrona:playground:renew -->
 
-In the third scenario, a storage claim waits for provisioning or a compatible placement. Storage binding mode and topology can link the claim to scheduling. A Pending claim under delayed binding may be expected before a consumer exists, while provisioning errors identify a different failure. Read the relationship before treating all Pending objects as identical.
+```sh
+kubectl get pods -n starfleet -o wide
+```
 
-## Evidence Timing And Controller Intent
+`lander` and `hauler` should show `Pending` and `<none>` in the `NODE` column. Phase `Pending` also covers pods that are scheduled and still pulling images, so the empty node column is what tells you the scheduler has not placed the pod. Ask for the reason with `describe`, and read the `Conditions` and `Events` at the bottom:
 
-Events may describe an older revision of the workload. If a selector was corrected ten minutes ago, an earlier mismatch event is not sufficient evidence that the current template is still wrong. Compare object generation, current fields, event timestamps and newly created Pods.
+```sh
+kubectl describe pod -n starfleet -l app=lander
+```
 
-Likewise, the controller's desired count can be correct while its children fail at later stages. A Deployment requesting three replicas can own three Pods, all without suitable node assignments. Object creation succeeded; availability did not. The failure belongs to the next required transition.
+The condition `PodScheduled` should be `False`. The events should contain a `FailedScheduling` event from `default-scheduler`. Its message starts with "0/1 nodes are available" and then counts the nodes it rejected for each reason. For `lander`, the reason is that the node did not match the pod's node selector. The scheduler does not guess: it tests every node against every rule and reports the rule that removed each node.
 
-A focused hypothesis states what cannot proceed and why. It predicts a specific observation, such as no assignment and a resource shortage, rather than simply naming a status category. The correction should remove that supported cause while preserving intended permissions, placement and data requirements. Verification then checks both progress at the failed stage and eventual usable capacity.
+## Node selectors, affinity and taints
+
+A **node selector** (`spec.nodeSelector`) is a map of labels. The scheduler only considers nodes that carry every label in the map. The `lander` Deployment asks for `disktype: quantum`, and no node has that label. You can see the labels the node does have:
+
+```sh
+kubectl get nodes --show-labels
+```
+
+There are two fixes: remove or correct the selector in the pod template, or label a node. Changing the pod template is the safer fix when the selector is a mistake. Labelling a node is the right fix when the node really has that property and the label was forgotten.
+
+Two other rules produce a similar message. **Node affinity** (`spec.affinity.nodeAffinity`) is a richer form of the selector, with operators such as `In` and `NotIn` and a "preferred" form that only ranks nodes. A **taint** is a key, a value and an effect set on a node, such as `NoSchedule`. A pod can only use a tainted node if it has a matching **toleration**. In the event text, a taint appears as "had untolerated taint". A single-node `kind` cluster removes the control-plane taint from its only node so that ordinary pods can run on it. The `Pending` pods in the playground are therefore caused by the selector and the request, not by a taint.
+
+## Resource requests
+
+A **resource request** (`resources.requests`) is the amount of CPU and memory the scheduler reserves for a container on a node. The scheduler adds up the requests of every pod already on a node and compares the sum with the node's **allocatable** capacity, which is the node's total minus what the system reserves. A pod fits only when its requests fit in what is left. The scheduler looks at requests, not at what the pods actually use.
+
+The `hauler` Deployment requests 64 CPUs. Compare that with the node:
+
+```sh
+kubectl describe node | grep -A 8 "Allocatable"
+```
+
+The `Allocatable` block shows the CPU and memory the node offers to pods. The `hauler` pod's events should say `Insufficient cpu`. Memory works the same way, with the message `Insufficient memory`. A request is a promise to the scheduler, so a request that is too large makes the pod unschedulable even if the application would use almost nothing.
+
+## Events outside one pod
+
+`kubectl describe` shows only the events of one pod. Events are also objects in the namespace, so you can list them all, newest last, and see which component reported what:
+
+```sh
+kubectl get events -n starfleet --sort-by=.lastTimestamp
+```
+
+Each row has a type (`Normal` or `Warning`), a reason, the object it is about and a message. Events expire after about an hour by default, so collect them early. The events of one object also stop growing when the problem repeats, because the API server merges identical events into one row with a count.
+
+## Fixing the Pending pods without guessing
+
+The evidence names the rule, so each fix is one change. Remove the impossible selector from `lander`:
+
+```sh
+kubectl patch deployment lander -n starfleet --type=json -p='[{"op":"remove","path":"/spec/template/spec/nodeSelector"}]'
+```
+
+Lower the request of `hauler` to a value that fits:
+
+```sh
+kubectl set resources deployment hauler -n starfleet --requests=cpu=10m
+```
+
+Both commands change the pod template, so the Deployment controller creates a new ReplicaSet and a new pod. Check the pods again with `kubectl get pods -n starfleet -o wide`. The new `lander` and `hauler` pods should now have a node. The old `Pending` pods are removed once the new pods are Ready. If a pod gets a node and then shows a different state, such as `ImagePullBackOff`, you have moved to the next stage, and the next stage has its own evidence.
+
+Pods can also stay `Pending` because they wait on something they depend on. A pod that mounts a PersistentVolumeClaim stays `Pending` until the claim is bound. In that case the `FailedScheduling` event mentions "unbound immediate PersistentVolumeClaims". The method is the same: the event names the missing dependency.
+
+## What you know now
+
+You can map a stuck pod to a lifecycle stage and a responsible component, read a `FailedScheduling` event, and distinguish a selector or taint problem from a resource request problem. The open question is what happens after the scheduler succeeds: a pod with a node can still fail while its image is pulled or its container starts.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Pending has several possible causes. Use placement and dependency evidence rather than assuming every Pending Pod needs more nodes.
+> Phase `Pending` does not always mean "not scheduled". Check the `NODE` column and the `PodScheduled` condition. A `Pending` pod with a node is waiting on the kubelet, for example for an image pull. Also remember that requests, not real usage, decide placement: a pod that uses little can still be unschedulable. And do not label a node to make a wrong selector match unless the node really has that property.

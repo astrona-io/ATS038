@@ -1,0 +1,27 @@
+# Reference solution. The scout claim is new. The probe-data claim is deleted
+# by apply.sh first, because storageClassName cannot change on a claim.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scout-data
+  namespace: starfleet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: probe-data
+  namespace: starfleet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi

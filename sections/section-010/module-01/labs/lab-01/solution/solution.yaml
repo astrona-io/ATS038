@@ -1,0 +1,23 @@
+# Reference solution: the headless Service and the ExternalName alias.
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe-pods
+  namespace: starfleet
+spec:
+  clusterIP: None
+  selector:
+    app: probe
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: outpost
+spec:
+  type: ExternalName
+  externalName: scout.starfleet.svc.cluster.local

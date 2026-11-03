@@ -1,39 +1,92 @@
----
-draft: true
-exam_objectives:
-  - Networking
----
 # Selectors, Ports And Backends
 
-The `probe` application has three Pods, and clients need one stable destination. A Service defines an access point and, for a selector-based Service, identifies backends by Pod labels. EndpointSlices store sets of network endpoints and related information, including readiness conditions used by forwarding implementations.
+A client needs one address that keeps working while Pods are created and deleted. A Service provides it. This part explains how a Service chooses its Pods, which of its port fields does what, and where the list of ready Pod addresses lives. Knowing these three things lets you explain nearly every "the Service does not answer" problem.
 
-A Service's `port` is the port exposed to clients. Its `targetPort` identifies the destination port on the backend. The application must actually listen at that destination. Changing the Service port does not reconfigure the application's listener.
+## A Service selects Pods with labels
 
-A selector mismatch can leave a Service with no matching endpoints even while all intended Pods are Running. A readiness failure can also make a backend unavailable for ordinary traffic. Inspect selection and readiness separately. Kubernetes does not infer that a Pod belongs behind a Service merely because their names look similar.
+A Service has a `selector`, which is a set of label key and value pairs. Every Pod in the same namespace that carries all of those labels is a candidate backend. The Service does not own the Pods and does not start them. It only matches them by label.
 
-A ClusterIP Service provides a virtual address for access within the cluster's network reachability boundaries. It is not automatically an externally reachable public endpoint. The address and forwarding implementation remain stable while backends change, though existing connections can still be affected by failures.
+The match is continuous. When a Pod with a matching label starts, it becomes a candidate. When a label changes or a Pod is deleted, it stops being one. A Service whose selector matches no Pod is valid, and it simply has no backends.
 
-A Service can also exist without a selector when endpoints are managed through another mechanism. Such a Service is not proof that the normal Pod selector controller created its backend records. Read the configuration before assuming one discovery method applies to every Service.
+The `scout` Service in the playground uses `app: scout` as its selector. The Pods of the `scout` Deployment carry `app: scout` in their template, so they match.
 
-Imagine a Service exposes port 80 but forwards to port 8080, while the application listens on 9000. Correct labels alone cannot fix that mismatch. Diagnose the access point, endpoint set and listener as three parts of the same request path.
+## The three port fields
 
-## Evaluating A Complete Backend Relationship
+A Service port entry has up to three numbers, and they are easy to confuse:
 
-Suppose `probe` Pods carry `app: probe` and listen on port 8080. A Service selecting `app: probe` exposes port 80 and forwards to 8080. Clients address port 80; the application receives traffic at 8080. These two numbers describe different sides of the forwarding relationship.
+- `port`: the port on the Service address that clients connect to.
+- `targetPort`: the port on the Pod that receives the traffic. It can be a number or the name of a container port.
+- `nodePort`: the port opened on every node, only for the NodePort and LoadBalancer types.
 
-If the selector changes to `app: scout`, healthy `probe` Pods no longer satisfy it. If the selector remains correct but the target changes to 9000, the discovered endpoint can be valid while connections fail at the destination listener. If labels and ports are correct but readiness fails, ordinary traffic eligibility can still be reduced. Diagnose each relationship separately.
+For `scout`, clients use port 80 and the Pod listens on 9898. The Service maps one to the other. Naming the container port (`http`) and using that name as `targetPort` keeps the Service correct if the container port number changes.
 
-A named target port can connect the Service to a port name in selected Pods. This can improve readability and support consistent contracts even when concrete port numbers vary appropriately. The name still needs to resolve to a meaningful container port declaration, and that declaration does not itself start the application listener.
+## EndpointSlices hold the ready addresses
 
-## EndpointSlices And Readiness
+Which Pods are ready right now? The EndpointSlice controller in the control plane answers this. It watches the Service and the matching Pods, and it writes EndpointSlice objects that list the Pod IP addresses, the ports and a `ready` condition for each endpoint. A Pod counts as ready when its readiness probe passes.
 
-EndpointSlices divide backend information into manageable records rather than relying on one arbitrary list of Pod names. They can include addresses, ports and conditions used by consumers of that endpoint information. Readiness is important to ordinary Service routing, while specialized settings can change publication behavior for applications that need to discover not-yet-ready members.
+`kube-proxy` on each node watches EndpointSlices and programs the node so that a connection to the Service address goes to one of the ready endpoints. The Service address is virtual; no interface owns it. EndpointSlices replaced the older Endpoints objects because a single Endpoints object grew too large for big Services. One Service can have several slices, and each slice holds up to 100 endpoints by default.
 
-That distinction matters for databases or peer discovery. Publishing an endpoint is not the same as telling ordinary callers it can safely serve requests. An author should state which discovery and traffic behavior the application needs rather than assume every Service treats all endpoints identically.
+```mermaid
+flowchart TB
+    S["Service: scout"] -->|"selector: app=scout"| E["EndpointSlice"]
+    E -->|"ready endpoints"| P1["Pod 10.244.0.12:9898"]
+    K["kube-proxy"] -->|"watches"| E
+    C["shuttle"] -->|"port 80"| K
+```
 
-The stable Service abstraction helps absorb Pod replacement, but existing connections and application errors remain outside a promise of uninterrupted success. A complete explanation traces client port, selection, endpoint eligibility and destination listener. A healthy observation at one step cannot replace evidence at the next.
+The diagram shows the EndpointSlice controller output that `kube-proxy` uses to forward a request from the client to a ready Pod.
+
+## Read a Service and its endpoints
+
+Look at the Service and the slices that belong to it. The label `kubernetes.io/service-name` links a slice to its Service.
+
+<!-- astrona:playground:renew -->
+
+```sh
+kubectl -n starfleet describe svc scout
+kubectl -n starfleet get endpointslices -l kubernetes.io/service-name=scout
+```
+
+The description shows the selector, the Service address, the port mapping and the endpoint address. The slice list shows the same Pod address with the port 9898. Compare the address with `kubectl -n starfleet get pod -l app=scout -o wide`; they should match.
+
+## Change the backends and watch the slice
+
+Scale the application to three replicas, wait for them, and read the slice again.
+
+```sh
+kubectl -n starfleet scale deployment scout --replicas=3
+kubectl -n starfleet rollout status deployment/scout
+kubectl -n starfleet get endpointslices -l kubernetes.io/service-name=scout -o yaml
+```
+
+The slice should now list three endpoints, each with `ready: true`. Scaling changed the Pods, and the EndpointSlice controller updated the slice. The Service was not touched.
+
+## A Service without endpoints
+
+Change the label that the Service selects on for one Pod and see what happens. Setting the label to a different value is enough to unmatch a Pod. Replace `<POD>` with one Pod name from `kubectl -n starfleet get pods -l app=scout`:
+
+```sh
+kubectl -n starfleet label pod <POD> app=scout-old --overwrite
+kubectl -n starfleet get endpointslices -l kubernetes.io/service-name=scout -o yaml
+```
+
+Right after the change the slice should list two endpoints, because the relabelled Pod no longer matches the Service. The ReplicaSet also no longer counts that Pod, so it creates a replacement, and the slice lists three endpoints again after the new Pod is ready. The relabelled Pod keeps running but receives no Service traffic. Delete it with `kubectl -n starfleet delete pod <POD>` when you finish.
+
+An empty slice has a recognisable cause. If the Service shows no endpoints, compare its `selector` with the Pod labels, and check that the Pods are ready. A selector typo is the most common reason. A wrong `targetPort` is the second, and it looks different: the slice has endpoints, but requests fail with `Connection refused`.
+
+## Named ports and multiple ports
+
+Port handling is a common source of mistakes, so it helps to know the exact rule.
+
+A Service can expose several ports. When it does, every port entry needs a `name`, so that the control plane and tools can tell the entries apart. The EndpointSlice repeats those names, which lets a client library find the port by name. When `targetPort` is a name, Kubernetes looks it up in each Pod separately. Two Pods behind one Service can therefore use different container port numbers for the same port name, which is useful during a migration.
+
+The `protocol` field defaults to TCP. A Service for a DNS server, for example, needs both a TCP and a UDP entry with the same port number.
+
+## What you now know
+
+A Service selects Pods by label, maps its `port` to the Pod `targetPort`, and relies on EndpointSlices for the list of ready addresses. `kube-proxy` turns that list into forwarding rules on each node. The question left open is who can reach the Service address.
 
 ## Common pitfalls
 
 > [!WARNING]
-> A Service does not start an application listener. Matching names do not select Pods; labels, readiness and port mapping determine the backend path.
+> A Service selects Pods only in its own namespace. A selector that matches nothing creates no error; the Service just has no endpoints. A Pod that fails its readiness probe is removed from the slice, so a Service can have Pods and still have no ready endpoints.

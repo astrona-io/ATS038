@@ -14,7 +14,7 @@ Ask whether `drifter` may list pods in the namespace `starfleet`:
 kubectl auth can-i list pods -n starfleet --as=system:serviceaccount:outpost:drifter
 ```
 
-The answer is `yes`, because of the cluster-wide binding from the previous example. The `--list` flag asks for everything instead of one verb:
+The answer is `yes`, because the `ClusterRoleBinding` named `drifter-view` gives it the `view` role in every namespace. The `--list` flag asks for everything instead of one verb:
 
 ```sh
 kubectl auth can-i --list -n outpost --as=system:serviceaccount:outpost:drifter
@@ -77,6 +77,14 @@ The `RoleBinding` gives the rules of `view` in `outpost` only, and deleting the 
 
 Narrowing permissions is one part of tightening. The other part is removing credentials that a workload never uses. The `shuttle` Deployment only calls other Services, so its token is not needed. Setting `automountServiceAccountToken: false` in its pod template removes the token from new pods. A Deployment change starts a new rollout, and only the new pods lose the mount. Pods that already run keep the token until they are replaced.
 
+The same field also works on the ServiceAccount. This command turns the automount off for every pod that runs as `auditor`:
+
+```sh
+kubectl patch serviceaccount auditor -n starfleet -p '{"automountServiceAccountToken": false}'
+```
+
+Pods that start later under `auditor` get no token file. Pods that already run as `auditor` are not changed.
+
 When a task asks you to "stop a pod from using the API", there are two correct places: the ServiceAccount, which affects every pod that uses it, and the pod template, which affects one workload. Choose the narrower one when several workloads share an account.
 
 ## What you know now
@@ -86,4 +94,4 @@ You can ask the API server what any identity may do with `can-i --as` and `--lis
 ## Common pitfalls
 
 > [!WARNING]
-> `can-i` answers for the authorizer only. A request that passes RBAC can still be rejected by admission. Deleting a binding does not stop pods that already hold a token, because the token stays valid until it expires or the pod is deleted, although the API server rejects the requests it makes. Never delete system bindings whose names start with `system:`.
+> `can-i` answers for the authorizer only. A request that passes RBAC can still be rejected by admission. Deleting a binding takes effect for new requests at once, but a token that a pod already holds stays valid until it expires, and it keeps proving the identity of the pod. Never delete system bindings whose names start with `system:`.

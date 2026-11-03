@@ -1,0 +1,288 @@
+# Knowledge check for section 010. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats038-010
+course_id: ATS038
+exam_code: KCNA
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-010
+  title: "Networking"
+questions:
+  - id: ats038-010-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain that each Pod has one IP address that its containers share, and that the address changes when the Pod is replaced"
+    source_readings:
+      - sections/section-010/module-01/course-01-pod-addresses-and-network-implementation.md
+    prompt: "A Pod runs two containers. One container must call the other. Which statement is correct?"
+    options:
+      - id: a
+        text: "The containers have separate IP addresses, so the caller needs a Service."
+        explanation: "Containers in one Pod share one network namespace and one address. No Service is needed."
+      - id: b
+        text: "The containers share the Pod network namespace and IP address, so the caller can use localhost."
+        explanation: "Correct. All containers in a Pod share one network namespace, so they reach each other on localhost, and they cannot listen on the same port."
+      - id: c
+        text: "The containers share an address only when they run on different nodes."
+        explanation: "Sharing does not depend on the node. It comes from the shared network namespace of the Pod."
+      - id: d
+        text: "The caller must use the node IP address and a node port."
+        explanation: "The node address is not needed for traffic inside one Pod."
+    correct_option: b
+    explanation: "All containers in a Pod share one network namespace, so they reach each other on localhost, and they cannot listen on the same port."
+
+  - id: ats038-010-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "State the three rules of the Kubernetes network model"
+    source_readings:
+      - sections/section-010/module-01/course-01-pod-addresses-and-network-implementation.md
+    prompt: "Which statement is part of the Kubernetes network model?"
+    options:
+      - id: a
+        text: "Pods in different namespaces can never reach each other."
+        explanation: "Namespaces are not network boundaries. Only a NetworkPolicy can limit traffic between them."
+      - id: b
+        text: "A Pod can reach any other Pod without network address translation."
+        explanation: "Correct. The model requires Pod-to-Pod traffic without NAT, and the same address seen from inside and outside."
+      - id: c
+        text: "Every Pod gets the IP address of its node."
+        explanation: "Each Pod has its own address, different from the node address."
+      - id: d
+        text: "Pod addresses stay the same after a Pod is replaced."
+        explanation: "The address belongs to the Pod. A replacement Pod normally gets a new address."
+    correct_option: b
+    explanation: "The model requires Pod-to-Pod traffic without NAT, and the same address seen from inside and outside."
+
+  - id: ats038-010-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Identify the network plugin's role and describe the CNI interface"
+    source_readings:
+      - sections/section-010/module-01/course-02-the-network-plugin-and-cross-node-traffic.md
+    prompt: "What does the container runtime do with the Container Network Interface when a Pod starts?"
+    options:
+      - id: a
+        text: "It calls a network plugin with an ADD command so that the plugin assigns an address and connects the Pod namespace."
+        explanation: "Correct. The runtime runs the CNI plugin with ADD on start and DEL on stop. The plugin allocates the address and wires the namespace."
+      - id: b
+        text: "It asks the scheduler to assign an address to the Pod."
+        explanation: "The scheduler chooses a node. It does not allocate addresses."
+      - id: c
+        text: "It asks CoreDNS to allocate the Pod IP address."
+        explanation: "CoreDNS answers name queries. It does not allocate addresses."
+      - id: d
+        text: "It asks kube-proxy to create the Pod network namespace."
+        explanation: "kube-proxy programs Service forwarding. The runtime creates the namespace."
+    correct_option: a
+    explanation: "The runtime runs the CNI plugin with ADD on start and DEL on stop. The plugin allocates the address and wires the namespace."
+
+  - id: ats038-010-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain how a Service name resolves through CoreDNS, including the short, namespaced and fully qualified forms"
+    source_readings:
+      - sections/section-010/module-01/course-03-dns-and-service-discovery-in-practice.md
+    prompt: "A Pod in `outpost` sends a request to `http://probe/get`. The Service `probe` exists only in `starfleet`. What happens?"
+    options:
+      - id: a
+        text: "The request works, because CoreDNS searches every namespace."
+        explanation: "The search list contains only the namespace of the client Pod, then svc and the cluster domain."
+      - id: b
+        text: "The name fails to resolve, because the short name is searched in `outpost` first and `probe.outpost.svc.cluster.local` does not exist."
+        explanation: "Correct. The resolver appends the search suffixes of the client namespace. `probe.starfleet` or the fully qualified name works from `outpost`."
+      - id: c
+        text: "The request reaches the Pod directly with its IP address."
+        explanation: "No address is involved. The failure happens during name resolution."
+      - id: d
+        text: "The request works only when the Service is headless."
+        explanation: "The Service type does not change the search rules."
+    correct_option: b
+    explanation: "The resolver appends the search suffixes of the client namespace. `probe.starfleet` or the fully qualified name works from `outpost`."
+
+  - id: ats038-010-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Distinguish a name that does not resolve from an address that does not answer"
+    source_readings:
+      - sections/section-010/module-01/course-03-dns-and-service-discovery-in-practice.md
+    prompt: "A client reports `Could not resolve host` for a Service name. Which layer should you check first?"
+    options:
+      - id: a
+        text: "The readiness probe of the target Pod."
+        explanation: "A readiness problem would show as missing endpoints or a refused connection, after name resolution."
+      - id: b
+        text: "The DNS configuration and the Service name, because no request left the Pod."
+        explanation: "Correct. A resolution error means the name did not turn into an address, so DNS, the namespace or the Service name is the first thing to check."
+      - id: c
+        text: "The NodePort range of the cluster."
+        explanation: "A node port is not involved in name resolution."
+      - id: d
+        text: "The Ingress path type."
+        explanation: "An Ingress is not involved in a name lookup inside the cluster."
+    correct_option: b
+    explanation: "A resolution error means the name did not turn into an address, so DNS, the namespace or the Service name is the first thing to check."
+
+  - id: ats038-010-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain how a Service selector, the port and targetPort fields, and EndpointSlices decide where a request goes"
+    source_readings:
+      - sections/section-010/module-02/course-01-selectors-ports-and-backends.md
+    prompt: "A Service shows no endpoints, but its Pods are running and ready. What is the most likely cause?"
+    options:
+      - id: a
+        text: "The Service type is ClusterIP."
+        explanation: "ClusterIP Services have endpoints like any other type."
+      - id: b
+        text: "The Service selector does not match the labels of the Pods."
+        explanation: "Correct. The EndpointSlice controller lists only ready Pods that match the selector in the Service namespace. A selector typo is the most common cause."
+      - id: c
+        text: "The nodePort is outside the allowed range."
+        explanation: "A nodePort error would stop the Service from being created."
+      - id: d
+        text: "The Pods use port names."
+        explanation: "Named ports are normal and work with targetPort."
+    correct_option: b
+    explanation: "The EndpointSlice controller lists only ready Pods that match the selector in the Service namespace. A selector typo is the most common cause."
+
+  - id: ats038-010-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Diagnose a Service that has endpoints but refuses connections"
+    source_readings:
+      - sections/section-010/module-02/course-01-selectors-ports-and-backends.md
+    prompt: "A Service has a ready endpoint with the Pod address, but every request fails with `Connection refused`. Which field should you check?"
+    options:
+      - id: a
+        text: "The `targetPort`, which must be the port on which the container listens."
+        explanation: "Correct. The endpoint exists, so the Service reached the Pod. A wrong targetPort sends the request to a port with no listener."
+      - id: b
+        text: "The `ingressClassName` of the Service."
+        explanation: "A Service has no ingressClassName. That field belongs to an Ingress."
+      - id: c
+        text: "The `externalName` of the Service."
+        explanation: "ExternalName Services have no endpoints."
+      - id: d
+        text: "The `clusterIP` of the Service."
+        explanation: "The cluster IP is allocated by the control plane and is not related to the listener."
+    correct_option: a
+    explanation: "The endpoint exists, so the Service reached the Pod. A wrong targetPort sends the request to a port with no listener."
+
+  - id: ats038-010-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Compare ClusterIP, NodePort and LoadBalancer Services and state who can reach each one"
+    source_readings:
+      - sections/section-010/module-02/course-02-service-types-and-node-access.md
+    prompt: "A Service of type LoadBalancer on a cluster without a load balancer controller shows `<pending>` as its external address. What does this mean?"
+    options:
+      - id: a
+        text: "The Service selector is wrong."
+        explanation: "A wrong selector shows as missing endpoints. It does not affect the external address."
+      - id: b
+        text: "No controller has created an external load balancer, but the Service still has a cluster address and a node port."
+        explanation: "Correct. LoadBalancer builds on NodePort and ClusterIP. A controller must create the external address, and without one the field stays pending."
+      - id: c
+        text: "The Service was rejected by the API server."
+        explanation: "A rejected Service would not exist."
+      - id: d
+        text: "The Pods are not ready."
+        explanation: "Readiness does not decide whether an external address is allocated."
+    correct_option: b
+    explanation: "LoadBalancer builds on NodePort and ClusterIP. A controller must create the external address, and without one the field stays pending."
+
+  - id: ats038-010-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain headless and ExternalName Services"
+    source_readings:
+      - sections/section-010/module-02/course-02-service-types-and-node-access.md
+    prompt: "What does CoreDNS return for the name of a headless Service?"
+    options:
+      - id: a
+        text: "The addresses of the ready Pods that the Service selects."
+        explanation: "Correct. With `clusterIP: None` there is no virtual address, so DNS answers with the Pod addresses."
+      - id: b
+        text: "A virtual ClusterIP from the Service range."
+        explanation: "A virtual address exists only for a Service that has a ClusterIP."
+      - id: c
+        text: "A CNAME that points at an external name."
+        explanation: "A CNAME answer is what an ExternalName Service produces."
+      - id: d
+        text: "No answer, because a headless Service has no name."
+        explanation: "A headless Service has a normal DNS name."
+    correct_option: a
+    explanation: "With `clusterIP: None` there is no virtual address, so DNS answers with the Pod addresses."
+
+  - id: ats038-010-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Distinguish an Ingress from a Service and from an Ingress controller"
+    source_readings:
+      - sections/section-010/module-02/course-03-external-entry-and-application-routing.md
+    prompt: "An Ingress object exists, and its address stays empty. Which cause fits best?"
+    options:
+      - id: a
+        text: "No Ingress controller is running that serves the Ingress class."
+        explanation: "Correct. An Ingress is only data. A controller must read it, configure a proxy and report the address."
+      - id: b
+        text: "The backend Service has the type ClusterIP."
+        explanation: "A ClusterIP backend is the normal case for an Ingress."
+      - id: c
+        text: "The Pods are on different nodes."
+        explanation: "Pod placement does not decide the Ingress address."
+      - id: d
+        text: "The Ingress uses pathType Prefix."
+        explanation: "Prefix is a valid path type."
+    correct_option: a
+    explanation: "An Ingress is only data. A controller must read it, configure a proxy and report the address."
+
+  - id: ats038-010-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain how NetworkPolicy selects and isolates Pods, and how both directions interact"
+    source_readings:
+      - sections/section-010/module-03/course-01-networkpolicy-and-allowed-connections.md
+    prompt: "A NetworkPolicy of type Ingress selects the `probe` Pods and allows only Pods labelled `app=shuttle`. What happens to a request from another Pod to `scout`, which no policy selects?"
+    options:
+      - id: a
+        text: "It is blocked, because the namespace now denies everything."
+        explanation: "Isolation applies to the Pods that a policy selects. Other Pods stay open."
+      - id: b
+        text: "It is allowed, because only the selected Pods are isolated."
+        explanation: "Correct. A Pod is isolated only when a policy selects it for that direction."
+      - id: c
+        text: "It is blocked, because policies apply to Services."
+        explanation: "Policies select Pods, not Services."
+      - id: d
+        text: "It is allowed only when it uses a Service name."
+        explanation: "The way the client addresses the Pod does not matter for an unselected Pod."
+    correct_option: b
+    explanation: "A Pod is isolated only when a policy selects it for that direction."
+
+  - id: ats038-010-q12
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Write an egress policy that includes DNS and predict whether a connection works with both directions"
+    source_readings:
+      - sections/section-010/module-03/course-02-egress-rules-and-both-directions.md
+    prompt: "A default-deny egress policy is applied to a client Pod, and one rule allows TCP 9898 to the `scout` Pods. The client calls `http://scout.starfleet/healthz` and fails at once with a resolution error. What is missing?"
+    options:
+      - id: a
+        text: "An ingress rule on the client."
+        explanation: "Ingress rules on the client do not affect its DNS queries."
+      - id: b
+        text: "A rule that allows UDP and TCP port 53 to the cluster DNS Pods."
+        explanation: "Correct. The DNS query is egress traffic. Without a DNS rule the name never resolves."
+      - id: c
+        text: "A rule that allows port 80, the Service port."
+        explanation: "Rules match the Pod port, not the Service port. Port 80 is not needed."
+      - id: d
+        text: "A rule for the Ingress controller."
+        explanation: "Ingress controllers are not involved."
+    correct_option: b
+    explanation: "The DNS query is egress traffic. Without a DNS rule the name never resolves."

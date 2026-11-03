@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Storage Decisions (LAB). Graded against the live cluster.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-lab-040-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - busybox:1.37
+
+# Starting state: `shuttle` writes to the dynamically provisioned claim
+# shuttle-logs (policy Delete), and the pod `archivist` waits for a claim
+# archive-claim that does not exist. This is left in place on purpose.
+bootstrap:
+  init:
+    - name: seed-cluster
+      description: Create the workloads and the starting claim
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+
+# Applied only by `astrona test`: the reference solution.
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: archive-pv-retain
+      description: archive-pv is a 1Gi ReadWriteOnce hostPath volume with class manual and policy Retain
+      type: file
+      source: validation/validate-archive-pv-retain.sh
+      hint: Create a PersistentVolume named archive-pv with capacity 1Gi, accessModes ReadWriteOnce, storageClassName manual, persistentVolumeReclaimPolicy Retain and a hostPath.
+    - name: archive-claim-bound
+      description: archive-claim in starfleet is Bound to archive-pv
+      type: file
+      source: validation/validate-archive-claim-bound.sh
+      hint: Create the claim archive-claim in starfleet with the same class, access mode and a size that fits into 1Gi.
+    - name: archivist-running
+      description: The archivist pod runs and writes to the volume
+      type: file
+      source: validation/validate-archivist-running.sh
+      hint: Once the claim exists and is bound, the pending archivist pod can start. Do not edit the pod.
+    - name: shuttle-volume-retained
+      description: The volume behind shuttle-logs has the Retain policy
+      type: file
+      source: validation/validate-shuttle-volume-retained.sh
+      hint: Find the PV name in the volumeName field of the claim, then patch persistentVolumeReclaimPolicy on that PV. The policy lives on the PV, not on the claim.
+    - name: shuttle-logs-intact
+      description: shuttle-logs is still Bound and its data is intact (guard)
+      type: file
+      source: validation/validate-shuttle-logs-intact.sh
+      hint: Do not delete the claim or the shuttle Deployment. Only change the policy of the volume.
+
+teardown:
+  keepCluster: false

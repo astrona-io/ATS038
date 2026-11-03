@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Diagnosing Cluster Services (PLAYGROUND) — playground environment.
+# A clean sandbox: it starts, applies healthy clients and a healthy backend,
+# plus Services and dependencies that fail on purpose, then stays running for
+# free exploration. No task, no grading, no `astrona submit`.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-playground-030-02
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - curlimages/curl:8.22.0
+      - busybox:1.37.0
+
+# What the learner starts with: scout, shuttle and drifter are healthy.
+# probe, relay, lander, gate and archive each have a fault in a Service or in
+# a dependency of the pod.
+bootstrap:
+  manifests:
+    - name: starfleet
+      type: file
+      source: manifests/starfleet.yaml
+    - name: faults
+      type: file
+      source: manifests/faults.yaml
+  waitFor:
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/drifter
+      namespace: outpost
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/relay
+      namespace: starfleet
+
+teardown:
+  keepCluster: false
