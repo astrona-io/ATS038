@@ -2,7 +2,7 @@
 
 Curriculum checked on 2026-10-10 against the [official KCNA domain list](https://training.linuxfoundation.org/certification/kubernetes-cloud-native-associate/). The four domain weights are 44%, 28%, 16% and 12%. The examination is multiple choice.
 
-These references support author review; learner reading pages are self-contained. No production configuration, command output or environment execution is claimed. This draft explains stable concepts and intentionally avoids attaching permanent maturity labels to named projects.
+These references support author review; learner reading pages are self-contained. No production configuration or command output is claimed, and the playgrounds and labs are statically checked but not yet run. The course explains stable concepts and intentionally avoids attaching permanent maturity labels to named projects.
 
 - [Services](https://kubernetes.io/docs/concepts/services-networking/service/)
 - [DNS](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)

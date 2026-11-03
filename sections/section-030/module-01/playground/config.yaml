@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Diagnosing Orchestration Failures (PLAYGROUND) — playground environment.
+# A clean sandbox: it starts, applies a healthy scout and shuttle plus six
+# Deployments that fail on purpose, then stays running for free exploration.
+# No task, no grading, no `astrona submit`.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-038-playground-030-01
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - curlimages/curl:8.22.0
+      - busybox:1.37.0
+
+# What the learner starts with: scout and shuttle are healthy. lander,
+# hauler, tanker, rover, miner and warden each fail at a different stage.
+bootstrap:
+  manifests:
+    - name: starfleet
+      type: file
+      source: manifests/starfleet.yaml
+    - name: faults
+      type: file
+      source: manifests/faults.yaml
+  waitFor:
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

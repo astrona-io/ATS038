@@ -1,0 +1,186 @@
+# Six Deployments that fail on purpose. Each one stops at a different stage
+# of the Pod lifecycle.
+#
+# lander  - nodeSelector that no node matches        -> Pending
+# hauler  - CPU request larger than any node          -> Pending
+# tanker  - image tag that does not exist             -> ErrImagePull / ImagePullBackOff
+# rover   - main process exits with code 1            -> CrashLoopBackOff
+# miner   - process needs more memory than the limit  -> OOMKilled
+# warden  - readiness probe path returns 404          -> Running but never Ready
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lander
+  namespace: starfleet
+  labels:
+    app: lander
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lander
+  template:
+    metadata:
+      labels:
+        app: lander
+    spec:
+      nodeSelector:
+        disktype: quantum
+      containers:
+        - name: lander
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hauler
+  namespace: starfleet
+  labels:
+    app: hauler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hauler
+  template:
+    metadata:
+      labels:
+        app: hauler
+    spec:
+      containers:
+        - name: hauler
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          resources:
+            requests:
+              cpu: "64"
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tanker
+  namespace: starfleet
+  labels:
+    app: tanker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tanker
+  template:
+    metadata:
+      labels:
+        app: tanker
+    spec:
+      containers:
+        - name: tanker
+          image: ghcr.io/stefanprodan/podinfo:6.15.999
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rover
+  namespace: starfleet
+  labels:
+    app: rover
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rover
+  template:
+    metadata:
+      labels:
+        app: rover
+    spec:
+      containers:
+        - name: rover
+          image: busybox:1.37.0
+          command: ["sh", "-c", "echo 'rover: loading mission file'; echo 'rover: mission file not found' >&2; exit 1"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: miner
+  namespace: starfleet
+  labels:
+    app: miner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: miner
+  template:
+    metadata:
+      labels:
+        app: miner
+    spec:
+      containers:
+        - name: miner
+          image: busybox:1.37.0
+          # Builds a string of about 20 MiB in memory, then sleeps.
+          command:
+            - sh
+            - -c
+            - 'x=aaaaaaaaaa; i=0; while [ $i -lt 21 ]; do x="$x$x"; i=$((i+1)); done; echo "miner: ready"; sleep 3600'
+          resources:
+            requests:
+              cpu: 10m
+              memory: 8Mi
+            limits:
+              memory: 16Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warden
+  namespace: starfleet
+  labels:
+    app: warden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: warden
+  template:
+    metadata:
+      labels:
+        app: warden
+    spec:
+      containers:
+        - name: warden
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /ready-check
+              port: http
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi

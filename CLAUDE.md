@@ -203,49 +203,45 @@ The course covers **Container Orchestration**, worth **28%** of
 **Kubernetes and Cloud Native Associate (KCNA)**. It is part of **ATP008**.
 The official objectives are listed in `astrona.yaml` and mapped in `CURRICULUM.md`.
 
-### Reading-only scope
+### Scope: hands-on course (rebuilt 2026-11-03)
 
-The maintainer approved the lesson plan, asked for deeper teaching, and explicitly
-requested **no labs or playgrounds**. That instruction overrides shared examples
-about hands-on environments, graded labs and playground markers. Do not create
-runtime configurations, executable exercises or playground lifecycle markers.
-The course must be usable without a cluster or installed command-line tools.
+The first draft of this course was reading-only. The maintainer then asked for
+the full course: a playground and a graded lab per module, a capstone lab per
+section, a quiz per section and a final domain quiz. The earlier "no labs or
+playgrounds" rule no longer applies. The shared playground, lab, `astrona.yaml`
+and marker rules above apply in full. The course targets `kindest/node:v1.35.8`.
+
+All labs and playgrounds are **UNTESTED**: they are built with static checks
+only (`astrona validate -c`, `bash -n`, YAML parse). Never claim a live run and
+never invent command output; pages describe expected results in words.
 
 ### Teaching structure and depth
 
-Every section begins with its own introduction and measurable learning outcomes.
-Every module contains a landing page, developed teaching lessons and a final
-`# Summary` page. Put the summary after all its lessons and before the next
-module. This reading-only summary has no playground destruction marker.
+Every section begins with its own introduction and learning outcomes. Every
+module has a landing page (with `<!-- astrona:playground -->`), three deep-dive
+parts, a lab placed right after the part it tests, and `course-04-summary.md`
+ending with `<!-- astrona:playground:destroy -->`. Each section ends with a
+capstone lab (`difficulty: advanced`; module labs are `intermediate`) and a
+`type: quiz` entry. `sections/final-domain-quiz.yaml` closes the course.
 
 Explain mechanisms, responsible components, realistic examples and the limits
-of each claim. Include worked reasoning and relevant failure cases. Avoid thin
-outlines, repetitive filler and invented command output. Split broad topics when
-needed; do not force a fixed number of lessons. The shared plain-English,
-self-contained-page and Mermaid rules apply throughout.
+of each claim. Avoid thin outlines and repetitive filler.
 
-### Reusable question data
+### Quiz data
 
-Write original single-choice questions as YAML banks under section folders and
-`assessments/`. Use the versioned contract in `schemas/question-bank.schema.json`
-and teaching order in `assessments/index.yaml`. Each bank has 5–15 questions with
-stable IDs, one correct option, per-option feedback, a measurable learning
-objective and source reading paths for author traceability.
-
-Do not register YAML as a Markdown reading. A future renderer consumes the bank
-index and presents the checkpoint after its declared reading, preserving bank
-order when several share an anchor. Do not expose answer keys before submission
-in a production quiz interface. These public banks are practice material, not
-secure or official exam questions.
+Quizzes are `sections/section-0N0/quiz.yaml` and `sections/final-domain-quiz.yaml`
+(`kind: question_bank`, `status: draft`, single-choice, per-option explanations,
+a measurable learning objective, real `source_readings`). They are registered in
+`astrona.yaml` as `type: quiz` with `pass_score: 70`. The older
+`sections/section-0N0/questions.yaml`, `assessments/` and
+`schemas/question-bank.schema.json` are leftovers of the reading-only draft and
+are not used by the manifest.
 
 ### Review and authoring checks
 
-Preserve the shared CLAUDE.md prefix copied from ATS015. Keep course IDs, official
-domain weights and ATP links unchanged. Technical pages have `draft: true` in
-Markdown front matter until review; a module-level flag alone is insufficient.
-The ATP registration remains draft until publication is approved.
-
-Primary author sources are recorded in `SOURCES.md`. The objective list was
-verified on 2026-10-10. Detailed reading expansions were written on 2026-10-11.
-Validate manifest paths, summary ordering, curriculum coverage and question
-contracts. Do not claim runtime verification for a reading-only course.
+Keep course IDs, official domain weights and ATP links unchanged. The build
+state is in `.astrona/build-state.yaml` and the design in `.astrona/blueprint.yaml`.
+Primary author sources are in `SOURCES.md`. Validate every config with
+`astrona validate -c <dir>`, scripts with `bash -n`, YAML with Ruby, manifest
+paths, summary ordering and quiz contracts. Do not claim runtime verification
+until a maintainer has run the labs.

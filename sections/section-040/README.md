@@ -1,13 +1,8 @@
----
-draft: true
-exam_objectives:
-  - Storage
----
 # Storage
 
-This section teaches volumes and application state; storage decisions. These ideas help you explain system behavior and choose a suitable approach in a KCNA scenario.
+A container's own filesystem disappears when the container is replaced. This section teaches how Kubernetes keeps data alive: which volume types last as long as a container, a Pod or a claim, how a PersistentVolume and a PersistentVolumeClaim bind, and how a StorageClass and a Container Storage Interface (CSI) driver create volumes on demand. It also teaches the choices that decide how data behaves: access modes, volume modes, reclaim policies, expansion and the difference between persistence, replication and backup.
 
-You will work through Volumes And Application State, Storage Decisions. Each module introduces its goals, teaches the concepts through examples, and closes with a summary. An original YAML question bank is prepared for the end of the section, with answer explanations for future quiz integration.
+Each of the two modules has a playground, a graded lab and a hands-on reading path. The section ends with a capstone lab and a short knowledge check. The playgrounds and labs run on a single-node `kind` cluster (Kubernetes 1.35).
 
 ## Learning Outcomes
 

@@ -1,0 +1,179 @@
+# Six Deployments that fail on purpose. Each one stops at a different stage
+# of the Pod lifecycle.
+#
+# Reference solution: the six faulty Deployments, fixed.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lander
+  namespace: starfleet
+  labels:
+    app: lander
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lander
+  template:
+    metadata:
+      labels:
+        app: lander
+    spec:
+      containers:
+        - name: lander
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hauler
+  namespace: starfleet
+  labels:
+    app: hauler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hauler
+  template:
+    metadata:
+      labels:
+        app: hauler
+    spec:
+      containers:
+        - name: hauler
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tanker
+  namespace: starfleet
+  labels:
+    app: tanker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tanker
+  template:
+    metadata:
+      labels:
+        app: tanker
+    spec:
+      containers:
+        - name: tanker
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rover
+  namespace: starfleet
+  labels:
+    app: rover
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rover
+  template:
+    metadata:
+      labels:
+        app: rover
+    spec:
+      containers:
+        - name: rover
+          image: busybox:1.37.0
+          command: ["sh", "-c", "echo 'rover: running'; while true; do sleep 30; done"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: miner
+  namespace: starfleet
+  labels:
+    app: miner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: miner
+  template:
+    metadata:
+      labels:
+        app: miner
+    spec:
+      containers:
+        - name: miner
+          image: busybox:1.37.0
+          # Builds a string of about 20 MiB in memory, then sleeps.
+          command:
+            - sh
+            - -c
+            - 'x=aaaaaaaaaa; i=0; while [ $i -lt 21 ]; do x="$x$x"; i=$((i+1)); done; echo "miner: ready"; sleep 3600'
+          resources:
+            requests:
+              cpu: 10m
+              memory: 8Mi
+            limits:
+              memory: 128Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warden
+  namespace: starfleet
+  labels:
+    app: warden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: warden
+  template:
+    metadata:
+      labels:
+        app: warden
+    spec:
+      containers:
+        - name: warden
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi

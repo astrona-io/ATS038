@@ -1,5 +1,5 @@
 version: 1
-approval: KCNA-LESSON-PLAN.md approved; reading-only correction 2026-10-10
+approval: KCNA-LESSON-PLAN.md approved; reading-only correction 2026-10-10; hands-on rebuild requested 2026-11-03 (labs, playgrounds, capstones, quizzes)
 course:
   id: ATS038
   certification:
@@ -14,9 +14,9 @@ course:
     - Troubleshooting
     - Storage
 defaults:
-  playground: false
-  module_lab: false
-  capstone: false
+  playground: true
+  module_lab: true
+  capstone: true
   section_quiz: true
   final_quiz: true
 sections:
@@ -34,8 +34,8 @@ sections:
     outline:
     - Pod Addresses And Network Implementation
     - DNS And Service Discovery
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
   - id: module-02
     title: Services And External Access
@@ -47,8 +47,8 @@ sections:
     outline:
     - Selectors, Ports And Backends
     - External Entry And Application Routing
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
   - id: module-03
     title: Traffic Control
@@ -60,10 +60,10 @@ sections:
     outline:
     - NetworkPolicy And Allowed Connections
     - Service Mesh And Transport Security
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
-  capstone: false
+  capstone: true
   section_quiz: true
 - id: section-020
   title: Security
@@ -79,8 +79,8 @@ sections:
     outline:
     - API Request Checks And Workload Identity
     - RBAC Scope And Least Privilege
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
   - id: module-02
     title: Workload Security
@@ -92,10 +92,10 @@ sections:
     outline:
     - Security Contexts And Pod Admission
     - Credentials And Image Supply Chains
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
-  capstone: false
+  capstone: true
   section_quiz: true
 - id: section-030
   title: Troubleshooting
@@ -111,8 +111,8 @@ sections:
     outline:
     - Placement And Dependency Evidence
     - Image Preparation And Container Startup
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
   - id: module-02
     title: Diagnosing Cluster Services
@@ -124,10 +124,10 @@ sections:
     outline:
     - Node Health And Shared Dependencies
     - Tracing A Service Request
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
-  capstone: false
+  capstone: true
   section_quiz: true
 - id: section-040
   title: Storage
@@ -143,8 +143,8 @@ sections:
     outline:
     - Storage Lifecycles And Claims
     - Provisioning, Classes And Drivers
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
   - id: module-02
     title: Storage Decisions
@@ -156,9 +156,9 @@ sections:
     outline:
     - Access Modes And Data Presentation
     - Reclaim Policies And Recovery
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     diagrams: []
-  capstone: false
+  capstone: true
   section_quiz: true
-assessment_format: YAML question banks, schema version 1; indexed in assessments/index.yaml
+assessment_format: quiz.yaml per section plus sections/final-domain-quiz.yaml, schema version 1
