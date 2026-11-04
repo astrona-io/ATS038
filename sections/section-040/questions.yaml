@@ -3,7 +3,7 @@ kind: question_bank
 id: ats038-section-040
 course_id: ATS038
 exam_code: KCNA
-status: draft
+status: alpha
 provenance: Original practice material; not official examination questions.
 scope:
   type: section

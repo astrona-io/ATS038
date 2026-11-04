@@ -5,7 +5,7 @@ kind: question_bank
 id: ats038-final
 course_id: ATS038
 exam_code: KCNA
-status: draft
+status: alpha
 provenance: Original practice material written for this course; not official exam
   questions.
 scope:
