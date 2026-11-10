@@ -208,7 +208,7 @@ modules:
         difficulty: intermediate
         estimated_duration: 20m
         topic: access-control
-        task_kind: troubleshoot
+        task_kind: troubleshooting
         tags: [rbac, role, rolebinding, clusterrolebinding, serviceaccount, least-privilege, auth-can-i]
         learning_goals:
           - Fix a Role that names the wrong API group
