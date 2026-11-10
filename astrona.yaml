@@ -184,6 +184,10 @@ modules:
       admission, Secrets and image checks.
     content:
       - type: reading
+        title: Section Overview
+        path: sections/section-020/README.md
+
+      - type: reading
         title: "Identity And Access"
         path: sections/section-020/module-01/course.md
       - type: reading
